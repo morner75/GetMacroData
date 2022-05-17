@@ -60,7 +60,7 @@ getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
 }
 
 ecosSearch <- function(x) {
-  data <- readRDS("Output/EcosStatsList.rds")
+  data <- readRDS("Rdata/EcosStatsList.rds")
   search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
   flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
   data %>% filter(flag)
@@ -93,20 +93,18 @@ getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_
 
 ECOS_key <- Sys.getenv(x="ECOS_key")
 
-# EcosTable <- getEcosList(ECOS_key = ECOS_key) %>% as_tibble()
-# 
-# CODE_LIST <- EcosTable %>% filter(검색가능여부=="Y") %>% pull(통계표코드)
-# 
-# CODE_LIST <- CODE_LIST[1:10]
-# 
-# safe_getEcosCode <-  safely(.f=function(x) getEcosCode(ECOS_key = ECOS_key, STAT_CODE = x))
-# 
-# EcosStatsList <- map(CODE_LIST, safe_getEcosCode) %>% 
-#                   transpose() %>% 
-#                   pluck("result") %>% 
-#                   bind_rows() %>% 
-#                   arrange(통계명,통계항목코드)
-# saveRDS(EcosStatsList,"Output/EcosStatsList.rds")
+EcosTable <- getEcosList(ECOS_key = ECOS_key) %>% as_tibble()
+
+CODE_LIST <- EcosTable %>% filter(검색가능여부=="Y") %>% pull(통계표코드)
+
+safe_getEcosCode <-  safely(.f=function(x) getEcosCode(ECOS_key = ECOS_key, STAT_CODE = x))
+
+EcosStatsList <- map(CODE_LIST, safe_getEcosCode) %>%
+                  transpose() %>%
+                  pluck("result") %>%
+                  bind_rows() %>%
+                  arrange(통계명,통계항목코드)
+saveRDS(EcosStatsList,"Rdata/EcosStatsList.rds")
 
 
 data_code <- ecosSearch(c("거시경제분석 지표")) %>% 
