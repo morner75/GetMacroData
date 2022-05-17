@@ -116,6 +116,34 @@ EcosTerm <- function(time,type){
             TRUE ~ as.character(year(time)))
 }
 
+getKeyStats <- function(ECOS_key=ECOS_key){
+  url <- paste0("http://ecos.bok.or.kr/api/KeyStatisticList/",ECOS_key,"/json/kr/1/100/")
+  html <- GET(url)
+  res <- rawToChar(html$content)
+  Encoding(res) <- "UTF-8"
+  json_all <- fromJSON(res)
+  
+  if (!is.null(json_all$RESULT)){
+    code <- json_all$RESULT$CODE	
+    msg  <- json_all$RESULT$MESSAGE	
+    stop(paste0(code, "\n ", msg))
+    
+  }
+  json_all[[1]][[2]] %>%  tibble::as_tibble() %>% 
+    dplyr::select(통계그룹명=CLASS_NAME, 
+                       통계명=KEYSTAT_NAME,
+                       시점=CYCLE, 
+                       값=DATA_VALUE, 
+                       단위=UNIT_NAME)
+}
+
+
+ecosSearch <- function(x) {
+  data <- readRDS("Output/EcosStatsList.rds")
+  search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
+  flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
+  data %>% filter(flag)
+}
 
 ## 2. KSIS API
 
