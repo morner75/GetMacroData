@@ -139,10 +139,10 @@ getKeyStats <- function(ECOS_key=ECOS_key){
 
 
 ecosSearch <- function(x) {
-  data <- readRDS("Output/EcosStatsList.rds")
+  data <- readRDS("Rdata/EcosStatsList.rds")
   search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
   flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
-  data %>% filter(flag)
+  data %>% filter(flag) %>% distinct()
 }
 
 ## 2. KSIS API
