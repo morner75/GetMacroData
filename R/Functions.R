@@ -34,7 +34,7 @@ year2date <- function(year) ymd(str_c(year,"-12-31"))
 getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_code1, 
                         item_code2, item_code3){
   
-  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/kr/1/500",
+  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/kr/1/10000",
                stat_code,period, start_time, end_time, item_code1, item_code2, item_code3,"", sep = "/")
   html <- GET(url)
   res <- rawToChar(html$content)
@@ -263,6 +263,9 @@ levelCleansingECOS <- function(DATA,name,period=c("MM","QQ","YY")) {
   }else if(period=="MM"){
     DATA[[name]]%>% transmute(time=as.yearmon(TIME,format="%Y%m"), val=as.double(DATA_VALUE)) %>%
       set_names(c("yearM",name))
+  }else if(period=="DD"){
+    DATA[[name]]%>% transmute(time=as.Date(TIME,format="%Y%m%d"), val=as.double(DATA_VALUE)) %>%
+      set_names(c("date",name))  
   } else{
     print("wrong input for the period argument")}
 }

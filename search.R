@@ -3,6 +3,9 @@ if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(pa
 sapply(packages,require,character.only=TRUE)
 
 source("R/Functions.R")
-ecosSearch("주택담보대출") %>% View()
+ecosSearch("통합재정수지") %>% View()
 
-ecosSearch("4.2.") %>% View()
+getEcosData(ECOS_key,'028Y009','MM',
+            start_time=EcosTerm(start_date,'MM'),
+            end_time =EcosTerm(today(),'MM'),
+            'C','?','?') 
