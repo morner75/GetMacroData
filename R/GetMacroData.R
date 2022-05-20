@@ -357,7 +357,7 @@ list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsData
 StatsDetails <- readRDS('Rdata/EcosStatsList.rds')
 StatsDescription <- code_list %>% 
               select(변수명=name,통계표코드=code,통계항목코드=sub1) %>% 
-              mutate(주기=str_extract(변수명,"_[YQMD]+.*$") %>% 
+              mutate(주기=str_extract(변수명,"_[YQMD]G?$") %>% 
                           str_sub(2,2) %>% 
                          factor(levels=c("Y","Q","M","D")),
                      .before=변수명) %>%
