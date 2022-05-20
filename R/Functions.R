@@ -53,58 +53,58 @@ getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_
 }
 
 
-# # retrieving stats list from ECOS
-# 
-# getEcosList <- function(ECOS_key=ECOS_key){
-#   url <- paste0("https://ecos.bok.or.kr/api/StatisticTableList/",ECOS_key,"/json/kr/1/1000/")
-#   html <- GET(url)
-#   res <- rawToChar(html$content)
-#   Encoding(res) <- "UTF-8"
-#   json_all <- fromJSON(res)
-#   
-#   if (!is.null(json_all$RESULT)){
-#     code <- json_all$RESULT$CODE	
-#     msg  <- json_all$RESULT$MESSAGE	
-#     stop(paste0(code, "\n ", msg))
-#     
-#   }
-#   json_all[[1]][[2]] %>%  tibble::as_tibble() %>% 
-#     dplyr::select(통계표코드=STAT_CODE, 
-#                        상위통계표코드=P_STAT_CODE,
-#                        통계명=STAT_NAME, 
-#                        주기=CYCLE,출처=ORG_NAME, 
-#                        검색가능여부=SRCH_YN)
-# }
-# 
-# # retrieving stats details from ECOS
-# 
-# getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
-#   url <- paste0("http://ecos.bok.or.kr/api/StatisticItemList/",ECOS_key,"/json/kr/1/1000/",STAT_CODE)
-#   html <- GET(url)
-#   res <- rawToChar(html$content)
-#   Encoding(res) <- "UTF-8"
-#   json_all <- fromJSON(res)
-#   
-#   if (!is.null(json_all$RESULT)){
-#     code <- json_all$RESULT$CODE	
-#     msg  <- json_all$RESULT$MESSAGE	
-#     stop(paste0(code, "\n ", msg))
-#     
-#   }
-#   json_all[[1]][[2]] %>% tibble::as_tibble() %>% 
-#     dplyr::select(통계표코드 = STAT_CODE,	
-#                        통계명 =	STAT_NAME	,
-#                        항목그룹코드 = GRP_CODE,	
-#                        항목그룹	= GRP_NAME,	
-#                        상위통계항목코드	= P_ITEM_CODE,	
-#                        통계항목코드	= ITEM_CODE,	
-#                        통계항목명	= ITEM_NAME,	
-#                        주기	= CYCLE,	
-#                        수록시작일자	= START_TIME,	
-#                        수록종료일자	= END_TIME,	
-#                        자료수	= DATA_CNT,	
-#                        가중치 = WEIGHT) 
-# }
+# retrieving stats list from ECOS
+
+getEcosList <- function(ECOS_key=ECOS_key){
+  url <- paste0("https://ecos.bok.or.kr/api/StatisticTableList/",ECOS_key,"/json/kr/1/1000/")
+  html <- GET(url)
+  res <- rawToChar(html$content)
+  Encoding(res) <- "UTF-8"
+  json_all <- fromJSON(res)
+
+  if (!is.null(json_all$RESULT)){
+    code <- json_all$RESULT$CODE
+    msg  <- json_all$RESULT$MESSAGE
+    stop(paste0(code, "\n ", msg))
+
+  }
+  json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
+    dplyr::select(통계표코드=STAT_CODE,
+                       상위통계표코드=P_STAT_CODE,
+                       통계명=STAT_NAME,
+                       주기=CYCLE,출처=ORG_NAME,
+                       검색가능여부=SRCH_YN)
+}
+
+# retrieving stats details from ECOS
+
+getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
+  url <- paste0("http://ecos.bok.or.kr/api/StatisticItemList/",ECOS_key,"/json/kr/1/1000/",STAT_CODE)
+  html <- GET(url)
+  res <- rawToChar(html$content)
+  Encoding(res) <- "UTF-8"
+  json_all <- fromJSON(res)
+
+  if (!is.null(json_all$RESULT)){
+    code <- json_all$RESULT$CODE
+    msg  <- json_all$RESULT$MESSAGE
+    stop(paste0(code, "\n ", msg))
+
+  }
+  json_all[[1]][[2]] %>% tibble::as_tibble() %>%
+    dplyr::select(통계표코드 = STAT_CODE,
+                       통계명 =	STAT_NAME	,
+                       항목그룹코드 = GRP_CODE,
+                       항목그룹	= GRP_NAME,
+                       상위통계항목코드	= P_ITEM_CODE,
+                       통계항목코드	= ITEM_CODE,
+                       통계항목명	= ITEM_NAME,
+                       주기	= CYCLE,
+                       수록시작일자	= START_TIME,
+                       수록종료일자	= END_TIME,
+                       자료수	= DATA_CNT,
+                       가중치 = WEIGHT)
+}
 
 
 
@@ -116,34 +116,34 @@ EcosTerm <- function(time,type){
             TRUE ~ as.character(year(time)))
 }
 
-# getKeyStats <- function(ECOS_key=ECOS_key){
-#   url <- paste0("http://ecos.bok.or.kr/api/KeyStatisticList/",ECOS_key,"/json/kr/1/100/")
-#   html <- GET(url)
-#   res <- rawToChar(html$content)
-#   Encoding(res) <- "UTF-8"
-#   json_all <- fromJSON(res)
-#   
-#   if (!is.null(json_all$RESULT)){
-#     code <- json_all$RESULT$CODE	
-#     msg  <- json_all$RESULT$MESSAGE	
-#     stop(paste0(code, "\n ", msg))
-#     
-#   }
-#   json_all[[1]][[2]] %>%  tibble::as_tibble() %>% 
-#     dplyr::select(통계그룹명=CLASS_NAME, 
-#                        통계명=KEYSTAT_NAME,
-#                        시점=CYCLE, 
-#                        값=DATA_VALUE, 
-#                        단위=UNIT_NAME)
-# }
-# 
-# 
-# ecosSearch <- function(x) {
-#   data <- readRDS("Rdata/EcosStatsList.rds")
-#   search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
-#   flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
-#   data %>% filter(flag) %>% distinct()
-# }
+getKeyStats <- function(ECOS_key=ECOS_key){
+  url <- paste0("http://ecos.bok.or.kr/api/KeyStatisticList/",ECOS_key,"/json/kr/1/100/")
+  html <- GET(url)
+  res <- rawToChar(html$content)
+  Encoding(res) <- "UTF-8"
+  json_all <- fromJSON(res)
+
+  if (!is.null(json_all$RESULT)){
+    code <- json_all$RESULT$CODE
+    msg  <- json_all$RESULT$MESSAGE
+    stop(paste0(code, "\n ", msg))
+
+  }
+  json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
+    dplyr::select(통계그룹명=CLASS_NAME,
+                       통계명=KEYSTAT_NAME,
+                       시점=CYCLE,
+                       값=DATA_VALUE,
+                       단위=UNIT_NAME)
+}
+
+
+ecosSearch <- function(x) {
+  data <- readRDS("Rdata/EcosStatsList.rds")
+  search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
+  flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
+  data %>% filter(flag) %>% distinct()
+}
 
 ## 2. KSIS API
 

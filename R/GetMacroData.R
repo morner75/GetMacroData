@@ -60,7 +60,7 @@ for(i in required.data){
               item_code2=code_info[["sub2"]],
               item_code3=code_info[["sub3"]]) %>% 
     mutate(DATA_VALUE=as.numeric(DATA_VALUE))
-  Sys.sleep(0.5)
+  Sys.sleep(0.1)
 } 
 
 
@@ -74,7 +74,7 @@ for(i in required.data){
 ################################################################
 
 # daily data from ECOS
-daily.data <- str_subset(required.data,"_D$")
+daily.data <- str_subset(required.data,"_D$") %>% sort()
 StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>% 
                reduce(full_join,by="date") %>% 
                select(date,sort(names(.)))
@@ -91,7 +91,7 @@ StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>%
 
 
 # monthly data from ECOS
-monthly.data <- str_subset(required.data,"_M$")
+monthly.data <- str_subset(required.data,"_M$") %>% sort()
 StarsDataM <- map(monthly.data,~levelCleansingECOS(DATA,.x,"MM")) %>% 
   reduce(full_join,by="yearM") 
 
@@ -139,7 +139,7 @@ StarsDataM <- StarsDataM %>%
 #
 ################################################################
 
-quarterly.data <- str_subset(required.data,"_Q$")
+quarterly.data <- str_subset(required.data,"_QG*$") %>% sort()
   
 StarsDataQ <- map(quarterly.data %>% 
                     str_subset(.,".*DEBT.*_Q$",negate = TRUE) %>% 
@@ -239,9 +239,9 @@ StarsDataQ <- StarsDataM %>%
 StarsDataQ <-  StarsDataQ %>% 
                   mutate(INT_CS_Q = INT_AAm3Y_Q-INT_KTB3Y_Q,
                          INT_TS_Q = INT_KTB10Y_Q-INT_CALL_Q,
-                         KOSPI_QG = makeVariable(KOSPI_Q,type="grwoth",terms=1),
+                         KOSPI_QG = makeVariable(KOSPI_Q,type="growth",terms=1),
                          INT_RKTB10Y_Q = INT_KTB10Y_Q - GDP_DF_Q,
-                         HOUSE_QG= makeVariable(HOUSE_Q,type="grwoth",terms=1),
+                         HOUSE_QG= makeVariable(HOUSE_Q,type="growth",terms=1),
                          DEBT_Q= HH_DEBT_Q + CP_DEBT_Q,
                          DEBT_QG= makeVariable(DEBT_Q,type='growth',terms = 1),
                          DEBT2GDP_Q = DEBT_Q/RGDP_Q,
@@ -261,7 +261,7 @@ StarsDataQ <-  StarsDataQ %>%
 
 
 # annual data from ECOS
-annual.data <- str_subset(required.data,"_Y$")
+annual.data <- str_subset(required.data,"_YG*$") %>% sort()
 StarsDataY <- map(annual.data %>% str_subset(".*DEBT.*_Y$",negate = TRUE), 
                   ~levelCleansingECOS(DATA,.x,"YY")) %>% 
               reduce(full_join,by="year") 
@@ -330,10 +330,19 @@ StarsDataY <- CP_DEBT1_Y %>%
 # INT_CS_Y, INT_TS_Y
 StarsDataY <-  StarsDataY %>% 
                 mutate(INT_CS_Y = INT_AAm3Y_Y-INT_KTB3Y_Y,
-                       INT_TS_Y = INT_KTB10Y_Y-INT_CALL_Y) %>% 
-                arrange(year) %>% 
-                select(year,sort(names(.)))
-
+                       INT_TS_Y = INT_KTB10Y_Y-INT_CALL_Y,
+                       KOSPI_YG = makeVariable(KOSPI_Y,type="growth",terms=1),
+                       INT_RKTB10Y_Y = INT_KTB10Y_Y - GDP_DF_Y,
+                       HOUSE_YG= makeVariable(HOUSE_Y,type="growth",terms=1),
+                       DEBT_Y= HH_DEBT_Y + CP_DEBT_Y,
+                       DEBT_YG= makeVariable(DEBT_Y,type='growth',terms = 1),
+                       DEBT2GDP_Y = DEBT_Y/RGDP_Y,
+                       HOUSE2INCOME_Y = HOUSE_Y/NGDP_Y,
+                       HH_MORT_YG=makeVariable(HH_MORT_Y,type='growth',terms = 1)) %>% 
+  arrange(year) %>% 
+  select(year,sort(names(.)))
+                       
+                       
 
 
 ################################################################
@@ -344,15 +353,32 @@ StarsDataY <-  StarsDataY %>%
 
 list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
 
+# data explanation
+StatsDetails <- readRDS('Rdata/EcosStatsList.rds')
+StatsDescription <- code_list %>% 
+              select(변수명=name,통계표코드=code,통계항목코드=sub1) %>% 
+              mutate(주기=str_extract(변수명,"_[YQMD]+.*$") %>% 
+                          str_sub(2,2) %>% 
+                         factor(levels=c("Y","Q","M","D")),
+                     .before=변수명) %>%
+              left_join(StatsDetails %>% 
+                          select(통계표코드,통계항목코드,통계항목코드,통계명, 통계항목명),
+                        by=c("통계표코드","통계항목코드")) %>% 
+              arrange(주기,변수명)
+
+
+
 wb <- createWorkbook()
 addWorksheet(wb,"quarterly")
 addWorksheet(wb,"annual")
 addWorksheet(wb,"monthly")
 addWorksheet(wb,"daily")
+addWorksheet(wb,"description")
 writeData(wb,"quarterly",StarsDataQ,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"annual",StarsDataY,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"monthly",StarsDataM,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"daily",StarsDataD,startCol=1,startRow=1,rowNames=FALSE)
+writeData(wb,"description",StatsDescription,startCol=1,startRow=1,rowNames=FALSE)
 saveWorkbook(wb,"Output/macro_data.xlsx",overwrite = TRUE)
 
 
