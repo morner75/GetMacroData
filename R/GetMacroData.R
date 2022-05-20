@@ -24,7 +24,7 @@ required_Q <-  c('USDKRW_Q','RGDP_Q','RGDP_QA','NGDP_Q','GOV_Q','GDP_DF_Q','UNEM
                  'CP_DEBT1_2_Q','HH_DEBT1_Q','CP_DEBT2_1_Q','CP_DEBT2_2_Q',
                  'HH_DEBT2_Q','CP_DEBT3_1_Q','CP_DEBT3_21_Q','CP_DEBT3_22_Q',
                  'HH_DEBT3_Q','OIL_Q','CU_Q','NI_Q','AL_Q','US_RGDP_QG','CHN_RGDP_QG',
-                 'HH_MORT_Q','CP_SALES_ROE_Q','CP_FINCOST_SALES_Q','EXT_DEBT_Q',
+                 'HH_MORT_Q','CP_INTCOVERAGE_Q','CP_DEBT2EQUITY_Q','EXT_DEBT_Q',
                  'CONSTRTN_QG', 'CRRNT_BAL_QG','EQUIP_INVEST_QG',  
                   str_c(INT_list,'_Q'))
                  
@@ -143,7 +143,7 @@ quarterly.data <- str_subset(required.data,"_QG*$") %>% sort()
   
 StarsDataQ <- map(quarterly.data %>% 
                     str_subset(.,".*DEBT.*_Q$",negate = TRUE) %>% 
-                    c(.,'EXT_DEBT_Q'), 
+                    c(.,'EXT_DEBT_Q','CP_DEBT2EQUITY_Q'), 
                   ~levelCleansingECOS(DATA,.x,"QQ")) %>% 
               reduce(full_join,by="yearQ")
 
@@ -324,8 +324,19 @@ StarsDataY <- CP_DEBT1_Y %>%
   left_join(CP_DEBT2_Y,by="year") %>% 
   transmute(year=year,
             CP_DEBT_Y=CP_DEBT1_Y+CP_DEBT2_Y) %>% 
-  right_join(StarsDataY,by="year") %>% 
-  arrange(year)
+  right_join(StarsDataY,by="year") 
+
+# Interest coverage ration
+
+StarsDataY <- StarsDataQ %>% 
+                mutate(year=year(yearQ)) %>% 
+                group_by(year) %>% 
+                summarise(CP_INTCOVERAGE_Y=mean(CP_INTCOVERAGE_Q,na.rm=TRUE),
+                          CP_DEBT2EQUITY_Y=mean(CP_DEBT2EQUITY_Q,na.rm=TRUE)) %>% 
+              ungroup() %>% 
+              right_join(StarsDataY,by="year") 
+                          
+
 
 # INT_CS_Y, INT_TS_Y
 StarsDataY <-  StarsDataY %>% 
