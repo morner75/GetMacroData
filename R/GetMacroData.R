@@ -15,31 +15,37 @@ QUANDL_key <- Sys.getenv(x="QUANDL_key")
 ### Retrieving data
 
 code_list <- readRDS("Rdata/ecos_code_list.rds")
+
+INT_list <- str_c('INT_',c('CALL','CD91','CP91',"BOK1Y","KTB1Y","KTB2Y","KTB3Y","KTB5Y","KTB10Y",'AAm3Y','BBBm3Y'))
+
+
 required_Q <-  c('USDKRW_Q','RGDP_Q','RGDP_QA','NGDP_Q','GOV_Q','GDP_DF_Q','UNEMP_QA',
-                 'EMP_Q','EMP_QA','CPI_Q','INT_CALL_Q','INT_CD91_Q','INT_KTB3Y_Q',
-                 'INT_KTB10Y_Q','INT_AAm3Y_Q','INT_BOK1Y_Q','CP_DEBT1_1_Q',
+                 'EMP_Q','EMP_QA','CPI_Q','CP_DEBT1_1_Q',
                  'CP_DEBT1_2_Q','HH_DEBT1_Q','CP_DEBT2_1_Q','CP_DEBT2_2_Q',
                  'HH_DEBT2_Q','CP_DEBT3_1_Q','CP_DEBT3_21_Q','CP_DEBT3_22_Q',
                  'HH_DEBT3_Q','OIL_Q','CU_Q','NI_Q','AL_Q','US_RGDP_QG','CHN_RGDP_QG',
-                 'HH_MORT_Q','CP_SALES_ROE_Q','CP_FINCOST_SALES_Q','EXT_DEBT_Q')
+                 'HH_MORT_Q','CP_SALES_ROE_Q','CP_FINCOST_SALES_Q','EXT_DEBT_Q',
+                 'CONSTRTN_QG', 'CRRNT_BAL_QG','EQUIP_INVEST_QG',  
+                  str_c(INT_list,'_Q'))
                  
 required_Y <-  c('USDKRW_Y','RGDP_Y','NGDP_Y','GOV_Y','GDP_DF_Y','UNEMP_Y','EMP_Y',
-                 'CPI_Y','KOSPI_Y','INT_CALL_Y','INT_CD91_Y','INT_KTB3Y_Y',
-                 'INT_KTB10Y_Y','INT_AAm3Y_Y','INT_BOK1Y_Y', 'HH_DI_Y','CP_DEBT1_1_Y',
+                 'CPI_Y','KOSPI_Y', 'HH_DI_Y','CP_DEBT1_1_Y',
                  'CP_DEBT1_2_Y','HH_DEBT1_Y','CP_DEBT2_1_Y','CP_DEBT2_2_Y',
                  'HH_DEBT2_Y','CP_DEBT3_1_Y','CP_DEBT3_21_Y','CP_DEBT3_22_Y',
                  'HH_DEBT3_Y','OIL_Y','CU_Y','NI_Y','AL_Y','US_RGDP_YG','CHN_RGDP_YG',
                  'HH_MORT_Y','HH_ASSET_NONFIN_Y','HH_ASSET_FIN_Y','CP_ASSET_Y',
-                 'CP_CAPITAL_Y','EXT_DEBT_Q')
+                 'CP_CAPITAL_Y','EXT_DEBT_Q', str_c(INT_list,'_Y'))
 
-required_M <-  c('HOUSE_M','KOSPI_M','INT_CALL_M','INT_CD91_M','INT_KTB3Y_M',
-                 'INT_KTB10Y_M','INT_AAm3Y_M', 'INT_BOK1Y_M','OIL_M','CU_M',
-                 'NI_M','ALL_M','GOV_BAL_M')
+required_M <-  c('USDKRW_M','HOUSE_M','KOSPI_M','OIL_M','CU_M','NI_M','ALL_M',
+                 'GOV_BAL_M','RESID_PERMIT_M','FRGN_CRRNCY_RESRV_M',
+                 str_c(INT_list,'_M'))
 
-required_D <-  c('KOSPI_D','INT_KTB3Y_D')
+required_D <-  c('USDKRW_D','KOSPI_D', str_c(INT_list,'_D'))
 
 
 required.data <- c(required_Y,required_Q,required_M,required_D)
+
+#required.data <- 'EXT_DEBT_Y'
                      
 DATA <- vector(mode="list",length=length(required.data)) %>% set_names(required.data)
 
@@ -54,17 +60,90 @@ for(i in required.data){
               item_code2=code_info[["sub2"]],
               item_code3=code_info[["sub3"]]) %>% 
     mutate(DATA_VALUE=as.numeric(DATA_VALUE))
+  Sys.sleep(0.5)
 } 
+
+
+
+
 
 ################################################################
 #
-# Part I. quarterly data
+# Part I. daily data
+#
+################################################################
+
+# daily data from ECOS
+daily.data <- str_subset(required.data,"_D$")
+StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>% 
+               reduce(full_join,by="date") %>% 
+               select(date,sort(names(.)))
+
+
+
+
+
+################################################################
+#
+# Part III. monthly data
+#
+################################################################
+
+
+# monthly data from ECOS
+monthly.data <- str_subset(required.data,"_M$")
+StarsDataM <- map(monthly.data,~levelCleansingECOS(DATA,.x,"MM")) %>% 
+  reduce(full_join,by="yearM") 
+
+
+# KOSPI_M
+StarsDataM <- rows_patch(StarsDataM,
+                         readRDS("Rdata/macro_file_data.rds")[["KOSPI_M"]] %>% 
+                           filter(yearM>=1990))
+
+# MSCIW
+StarsDataM <- readRDS("Rdata/macro_file_data.rds")[["MSCIW_M"]] %>%
+  filter(yearM>=as.yearmon(start_date)) %>% 
+  right_join(StarsDataM,by="yearM") 
+
+
+# REER 
+
+bisDB <- getBISDB()  
+bis_REER <- bisDB %>% 
+  filter(name=="Effective exchange rate indices (monthly)") %>% 
+  pull() %>% 
+  downloadBISDB()
+
+StarsDataM<-  bis_REER %>% 
+              filter(str_detect(REF_AREA,"KR"),str_detect(Type,"Real")) %>% 
+              select(Basket,contains("-")) %>% 
+              mutate(Basket=recode(Basket, `Broad (60 economies)`="broad", `Narrow (27 economies)`="narrow")) %>% 
+              pivot_longer(-Basket,names_to = "yearM",values_to = "REER") %>% 
+              mutate(yearM=as.yearmon(yearM,format="%Y-%m")) %>% 
+              drop_na() %>% 
+              pivot_wider(names_from="Basket",values_from = REER) %>% 
+              rename(REER_BB_M=broad,
+                     REER_NB_M=narrow) %>% 
+              right_join(StarsDataM,by="yearM") %>%
+              filter(yearM>=as.yearmon(start_date)) %>% 
+              arrange(yearM)
+
+
+StarsDataM <- StarsDataM %>% 
+               select(yearM,sort(names(.)))
+
+################################################################
+#
+# Part III. quarterly data
 #
 ################################################################
 
 quarterly.data <- str_subset(required.data,"_Q$")
   
-StarsDataQ <- map(quarterly.data %>% str_subset(".*DEBT.*_Q$",negate = TRUE), 
+StarsDataQ <- map(quarterly.data %>% 
+                    str_subset(.,".*DEBT.*_Q$",negate = TRUE) %>% 
+                    c(.,'EXT_DEBT_Q'), 
                   ~levelCleansingECOS(DATA,.x,"QQ")) %>% 
               reduce(full_join,by="yearQ")
 
@@ -83,12 +162,6 @@ StarsDataQ <- mon2qtrECOS(DATA,"HOUSE_M") %>%
               right_join(StarsDataQ,by="yearQ") %>% 
               arrange(yearQ)
 
-# # Oil, Quantdl package (source: Federal Reserve Economic DATA)
-# 
-# StarsDataQ <- Quandl("FRED/WTISPLC", type="raw", collapse="quarterly", start_date=start_date, api_key=QUANDL_key) %>% 
-#               mutate(yearQ=as.yearqtr(as.character(quarter(ymd(Date),with_year=TRUE)),format="%Y.%q")) %>% 
-#               dplyr::select(yearQ,OIL_Q=Value)  %>% 
-#               right_join(StarsDataQ,by="yearQ")
 
 # MSCI index from webpage
 StarsDataQ <- readRDS("Rdata/macro_file_data.rds")[["MSCIW_M"]] %>%
@@ -98,64 +171,12 @@ StarsDataQ <- readRDS("Rdata/macro_file_data.rds")[["MSCIW_M"]] %>%
               right_join(StarsDataQ,by="yearQ") 
 
 # REER from BIS
-
-bisDB <- getBISDB()  
-bis_REER <- bisDB %>% 
-              filter(name=="Effective exchange rate indices (monthly)") %>% 
-              pull() %>% 
-              downloadBISDB()
-
-REER_M <-  bis_REER %>% 
-            filter(str_detect(REF_AREA,"KR"),str_detect(Type,"Real")) %>% 
-            select(Basket,contains("-")) %>% 
-            mutate(Basket=recode(Basket, `Broad (60 economies)`="broad", `Narrow (27 economies)`="narrow")) %>% 
-            pivot_longer(-Basket,names_to = "yearM",values_to = "REER") %>% 
-            mutate(yearM=as.yearmon(yearM,format="%Y-%m")) %>% 
-            drop_na()
-
-REER_BB_Q <- REER_M %>% 
-              filter(Basket=="broad") %>%  
-              transmute(yearQ=as.yearqtr(yearM),
-                        REER_BB=REER) %>% 
+StarsDataQ <- StarsDataM %>% 
+              mutate(yearQ=as.yearqtr(yearM)) %>% 
               group_by(yearQ) %>% 
-              summarise(REER_BB_Q=mean(REER_BB)) %>% 
-              ungroup()
-
-
-REER_NB_Q <- REER_M %>%   
-              filter(Basket=="narrow") %>%  
-              transmute(yearQ=as.yearqtr(yearM),
-                        REER_NB=REER) %>% 
-              group_by(yearQ) %>% 
-              summarise(REER_NB_Q=mean(REER_NB)) %>% 
-              ungroup()
-                        
-
-REER_BB_Y <- REER_M %>% 
-              filter(Basket=="broad") %>%  
-              transmute(year=year(yearM),
-                        REER_BB=REER) %>% 
-              group_by(year) %>% 
-              summarise(REER_BB_Y=mean(REER_BB),
-                        REER_BB_VOL_Y=sd(REER_BB)) %>% 
-              ungroup()
-
-REER_NB_Y <- REER_M %>%   
-              filter(Basket=="narrow") %>%  
-              transmute(year=year(yearM),
-                        REER_NB=REER) %>% 
-              group_by(year) %>% 
-              summarise(REER_NB_Y=mean(REER_NB),
-                        REER_NB_VOL_Y=sd(REER_NB)) %>% 
-              ungroup()
-
-REER_Y <- left_join(REER_NB_Y,REER_BB_Y,by="year")
-
-StarsDataQ <- right_join(REER_BB_Q,REER_NB_Q, by="yearQ") %>%
+              summarise(REER_BB_Q=mean(REER_BB_M),REER_NB_Q=mean(REER_NB_M)) %>% 
+              ungroup() %>% 
               right_join(StarsDataQ,by="yearQ")
-
-
-
 
 # adding HH_DEBT
 work_needed_data <- str_subset(required.data,"HH_DEBT._Q$") 
@@ -193,11 +214,43 @@ StarsDataQ <- CP_DEBT1_Q %>%
               arrange(yearQ)
 
 
-# Compute INT_CS_Q, INT_TS_Q
+
+# bond return volatility, stock return volatility (D to Q)
+StarsDataQ <- StarsDataD %>% 
+                mutate(yearQ=as.yearqtr(date)) %>%
+                group_by(yearQ) %>% 
+                summarise(INT_KTB3Y_VOL_Q=sd(INT_KTB3Y_D,na.rm = TRUE),
+                          KOPSI_VOL_Q=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
+                right_join(StarsDataQ,by="yearQ")
+
+# Residential permit, Foreing currency reserve, government balance (M to Q)
+StarsDataQ <- StarsDataM %>% 
+                mutate(yearQ=as.yearqtr(yearM)) %>%
+                group_by(yearQ) %>% 
+                summarise(FRGN_CRRNCY_RESRV_Q=sum(FRGN_CRRNCY_RESRV_M),
+                          GOV_BAL_Q=sum(GOV_BAL_M),
+                          RESID_PERMIT_Q=sum(RESID_PERMIT_M)) %>% 
+                right_join(StarsDataQ,by="yearQ")
+
+
+
+
+# Compute INT_CS_Q, INT_TS_Q, KOSPI_QG(stock return) (Q to Q)
 StarsDataQ <-  StarsDataQ %>% 
-                mutate(INT_CS_Q = INT_AAm3Y_Q-INT_KTB3Y_Q,
-                       INT_TS_Q = INT_KTB10Y_Q-INT_CALL_Q) %>% 
-                arrange(yearQ) 
+                  mutate(INT_CS_Q = INT_AAm3Y_Q-INT_KTB3Y_Q,
+                         INT_TS_Q = INT_KTB10Y_Q-INT_CALL_Q,
+                         KOSPI_QG = makeVariable(KOSPI_Q,type="grwoth",terms=1),
+                         INT_RKTB10Y_Q = INT_KTB10Y_Q - GDP_DF_Q,
+                         HOUSE_QG= makeVariable(HOUSE_Q,type="grwoth",terms=1),
+                         DEBT_Q= HH_DEBT_Q + CP_DEBT_Q,
+                         DEBT_QG= makeVariable(DEBT_Q,type='growth',terms = 1),
+                         DEBT2GDP_Q = DEBT_Q/RGDP_Q,
+                         HOUSE2INCOME_Q = HOUSE_Q/NGDP_Q,
+                         HH_MORT_QG=makeVariable(HH_MORT_Q,type='growth',terms = 1)) %>% 
+                  arrange(yearQ) %>% 
+                  select(yearQ,sort(names(.)))
+    
+
 
 
 ################################################################
@@ -213,9 +266,13 @@ StarsDataY <- map(annual.data %>% str_subset(".*DEBT.*_Y$",negate = TRUE),
                   ~levelCleansingECOS(DATA,.x,"YY")) %>% 
               reduce(full_join,by="year") 
 
-# REER_BB from BIS
-
-StarsDataY <- left_join(StarsDataY,REER_Y, by="year")
+# REER from BIS
+StarsDataY <- StarsDataM %>% 
+                mutate(year=year(yearM)) %>% 
+                group_by(year) %>% 
+                summarise(REER_BB_Y=mean(REER_BB_M),REER_NB_Y=mean(REER_NB_M)) %>% 
+                ungroup() %>% 
+                right_join(StarsDataY,by="year")
 
 
 # World Bank annual growth, wbstats package (Source: World Bank) 
@@ -270,73 +327,12 @@ StarsDataY <- CP_DEBT1_Y %>%
   right_join(StarsDataY,by="year") %>% 
   arrange(year)
 
-
-# # Oil, Quantdl package (source: Federal Reserve Economic DATA)
-# 
-# StarsDataY <- Quandl("FRED/WTISPLC", type="raw", collapse="annual", start_date=start_date, api_key=QUANDL_key) %>% 
-#   mutate(year=year(ymd(Date))) %>% 
-#   dplyr::select(year,OIL_Y=Value)  %>% 
-#   right_join(StarsDataY,by="year") %>% 
-#   arrange(year)
-
-
 # INT_CS_Y, INT_TS_Y
 StarsDataY <-  StarsDataY %>% 
                 mutate(INT_CS_Y = INT_AAm3Y_Y-INT_KTB3Y_Y,
                        INT_TS_Y = INT_KTB10Y_Y-INT_CALL_Y) %>% 
-                arrange(year) 
-
-
-################################################################
-#
-# Part III. monthly data
-#
-################################################################
-
-
-# monthly data from ECOS
-monthly.data <- str_subset(required.data,"_M$")
-StarsDataM <- map(monthly.data,~levelCleansingECOS(DATA,.x,"MM")) %>% 
-  reduce(full_join,by="yearM") 
-
-
-# MSCIW
-StarsDataM <- readRDS("Rdata/macro_file_data.rds")[["MSCIW_M"]] %>%
-              filter(yearM>=as.yearmon(start_date)) %>% 
-              right_join(StarsDataM,by="yearM") 
-
-
-# # Oil, Quantdl package (source: Federal Reserve Economic DATA)
-# 
-# StarsDataM <- Quandl("FRED/WTISPLC", type="raw", collapse="monthly", start_date=start_date, api_key=QUANDL_key) %>% 
-#   mutate(yearM=as.yearmon(ymd(Date))) %>% 
-#   dplyr::select(yearM,OIL_M=Value)  %>% 
-#   right_join(StarsDataM,by="yearM") %>% 
-#   arrange(yearM)
-
-# REER 
-
-StarsDataM <- REER_M %>% 
-                pivot_wider(names_from="Basket",values_from = REER) %>% 
-                rename(REER_BB_M=broad,
-                       REER_NB_M=narrow) %>% 
-                right_join(StarsDataM,by="yearM") %>%
-                filter(yearM>=as.yearmon(start_date)) %>% 
-                arrange(yearM)
-      
-
-################################################################
-#
-# Part IV. daily data
-#
-################################################################
-
-# daily data from ECOS
-daily.data <- str_subset(required.data,"_D$")
-StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>% 
-  reduce(full_join,by="date") 
-
-
+                arrange(year) %>% 
+                select(year,sort(names(.)))
 
 
 
@@ -358,6 +354,9 @@ writeData(wb,"annual",StarsDataY,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"monthly",StarsDataM,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"daily",StarsDataD,startCol=1,startRow=1,rowNames=FALSE)
 saveWorkbook(wb,"Output/macro_data.xlsx",overwrite = TRUE)
+
+
+
 rm(list=ls())
 
 ################################################################

@@ -143,3 +143,15 @@ ecos_macro <- ecos_macro_raw %>%
 
 saveRDS(ecos_macro,"Output/ecos_macro.rds")
 
+
+wb <- createWorkbook()
+addWorksheet(wb,"ecos_macro")
+writeData(wb,"ecos_macro",ecos_macro,startCol=1,startRow=1,rowNames=FALSE)
+saveWorkbook(wb,"Output/ecos_macro_data.xlsx",overwrite = TRUE)
+rm(list=ls())
+
+
+
+
+
+
