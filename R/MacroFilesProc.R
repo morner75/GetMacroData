@@ -16,6 +16,9 @@ read_csv("InputFiles/data_description.csv",col_names =TRUE) %>%
 file_data <- list()
 
 # KOSPI index (historical data before ECOS data begins) 
+file_data[["KOSPI_D"]]<- read_csv("InputFiles/KOSPI.csv",col_names=TRUE) %>% 
+  transmute(date=as.Date(date),KOSPI_D=close) 
+
 file_data[["KOSPI_M"]]<- read_csv("InputFiles/KOSPI.csv",col_names=TRUE) %>% 
                         transmute(yearM=as.yearmon(as.Date(date)),val=close) %>% 
                         group_by(yearM) %>% summarize(KOSPI_M=mean(val))
