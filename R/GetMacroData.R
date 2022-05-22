@@ -12,7 +12,83 @@ current_date <- as.Date(Sys.time())
 ECOS_key <- Sys.getenv(x="ECOS_key")
 
 
-### Retrieving data
+## 1. ECOS Macro Economic Data -------------------------------------------------
+
+ecos_macro_M <- readRDS("Rdata/ecos_macro_raw_M.rds")
+ecos_macro_Q <- readRDS("Rdata/ecos_macro_raw_Q.rds")
+ecos_macro_Y <- readRDS("Rdata/ecos_macro_raw_Y.rds")
+EcosStatsList <- readRDS("Rdata/EcosStatsList.rds")
+variable_names <- read.csv("InputFiles/ecos_macro_variables_list.csv") %>% 
+                  filter(USE=="O") %>% 
+                  select(-USE)
+
+tidy_ecos_macro_M <- ecos_macro_M %>% 
+                      pivot_longer(-yearM,names_to='ITEM_CODE') %>% 
+                      inner_join(variable_names,by="ITEM_CODE") %>% 
+                      mutate(yearQ=as.yearqtr(yearM)) 
+
+monthly_data_code <- tidy_ecos_macro_M %>%
+                      drop_na(value) %>% 
+                      group_by(yearQ,ITEM_CODE) %>% 
+                      summarise(N=n()) %>% 
+                      group_by(ITEM_CODE) %>% 
+                      summarise(average=mean(N)) %>% 
+                      filter(average>2) %>% 
+                      pull(ITEM_CODE)
+
+monthly_data <- tidy_ecos_macro_M %>% 
+                select(-yearQ) %>% 
+                filter(ITEM_CODE %in% monthly_data_code) %>% 
+                mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_MG"),str_c(NAME,"_M"))) %>% 
+                select(yearM,NAME, value)
+
+
+tidy_ecos_macro_Q <- ecos_macro_Q %>% 
+                    pivot_longer(-yearQ,names_to='ITEM_CODE') %>% 
+                    inner_join(variable_names,by="ITEM_CODE") %>% 
+                    mutate(yearQ=as.yearqtr(yearQ,format="%Y%q")) 
+
+quarterly_data <- tidy_ecos_macro_Q %>% 
+                   mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_QG"),str_c(NAME,"_Q"))) %>% 
+                   select(yearQ,NAME, value)
+
+
+tidy_ecos_macro_Y <- ecos_macro_Y %>% 
+                      pivot_longer(-year,names_to='ITEM_CODE') %>% 
+                      inner_join(variable_names,by="ITEM_CODE")  
+
+annual_data <- tidy_ecos_macro_Y %>% 
+                  mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_YG"),str_c(NAME,"_Y"))) %>% 
+                  select(year,NAME, value)
+
+description <- tidy_ecos_macro_M %>% select(NAME,ITEM_CODE) %>% distinct() %>% 
+                  left_join(EcosStatsList %>% 
+                              filter(str_detect(STAT_NAME_EN,"Macro Economic Analysis")) %>% 
+                              select(STAT_CODE, ITEM_CODE, STAT_NAME, ITEM_NAME,ITEM_NAME_EN),
+                            by="ITEM_CODE") 
+
+ecos_macro <- list(annual=annual_data, quarterly=quarterly_data, monthly=monthly_data,description=description)
+saveRDS(ecos_macro,'Rdata/ecos_macro.rds')
+
+monthly_dataW <- monthly_data %>% pivot_wider(names_from = NAME,values_from = value)
+quarterly_dataW <- quarterly_data %>% pivot_wider(names_from = NAME,values_from = value)
+annual_dataW <- annual_data %>% pivot_wider(names_from = NAME,values_from = value)
+
+wb <- createWorkbook()
+addWorksheet(wb,"monthly")
+addWorksheet(wb,"quarterly")
+addWorksheet(wb,"annual")
+addWorksheet(wb,"description")
+writeData(wb,"monthly",monthly_dataW,startCol=1,startRow=1,rowNames=FALSE)
+writeData(wb,"quarterly",quarterly_dataW,startCol=1,startRow=1,rowNames=FALSE)
+writeData(wb,"annual",annual_dataW,startCol=1,startRow=1,rowNames=FALSE)
+writeData(wb,"description",description,startCol=1,startRow=1,rowNames=FALSE)
+saveWorkbook(wb,"Output/ecos_macro_data.xlsx",overwrite = TRUE)
+
+
+## 2. Stress Test data ---------------------------------------------------------
+
+# Retrieving data
 
 code_list <- readRDS("Rdata/ecos_code_list.rds")
 
@@ -25,7 +101,6 @@ required_Q <-  c('USDKRW_Q','RGDP_Q','RGDP_QA','NGDP_Q','GOV_Q','GDP_DF_Q','UNEM
                  'HH_DEBT2_Q','CP_DEBT3_1_Q','CP_DEBT3_21_Q','CP_DEBT3_22_Q',
                  'HH_DEBT3_Q','OIL_Q','CU_Q','NI_Q','AL_Q','US_RGDP_QG','CHN_RGDP_QG',
                  'HH_MORT_Q','CP_INTCOVERAGE_Q','CP_DEBT2EQUITY_Q','EXT_DEBT_Q',
-                 'CONSTRTN_QG', 'CRRNT_BAL_Q','EQUIP_INVEST_QG',  
                   str_c(INT_list,'_Q'))
                  
 required_Y <-  c('USDKRW_Y','RGDP_Y','NGDP_Y','GOV_Y','GDP_DF_Y','UNEMP_Y','EMP_Y',
@@ -37,7 +112,7 @@ required_Y <-  c('USDKRW_Y','RGDP_Y','NGDP_Y','GOV_Y','GDP_DF_Y','UNEMP_Y','EMP_
                  'CP_CAPITAL_Y','EXT_DEBT_Q', str_c(INT_list,'_Y'))
 
 required_M <-  c('USDKRW_M','HOUSE_M','KOSPI_M','OIL_M','CU_M','NI_M','ALL_M',
-                 'GOV_BAL_M','RESID_PERMIT_M','FRGN_CRRNCY_RESRV_M',
+                 'GOV_BAL_M','RESID_PERMIT_M',
                  str_c(INT_list,'_M'))
 
 required_D <-  c('USDKRW_D','KOSPI_D', str_c(INT_list,'_D'))

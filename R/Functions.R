@@ -32,9 +32,9 @@ year2date <- function(year) ymd(str_c(year,"-12-31"))
 # retrieving data from ECOS
 
 getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_code1, 
-                        item_code2, item_code3){
+                        item_code2, item_code3, lang="kr"){
   
-  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/kr/1/10000",
+  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/",lang,"/1/10000",
                stat_code,period, start_time, end_time, item_code1, item_code2, item_code3,"", sep = "/")
   html <- GET(url)
   res <- rawToChar(html$content)
@@ -54,9 +54,8 @@ getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_
 
 
 # retrieving stats list from ECOS
-
-getEcosList <- function(ECOS_key=ECOS_key){
-  url <- paste0("https://ecos.bok.or.kr/api/StatisticTableList/",ECOS_key,"/json/kr/1/1000/")
+getEcosList <- function(ECOS_key=ECOS_key,lang="kr"){
+  url <- paste0("https://ecos.bok.or.kr/api/StatisticTableList/",ECOS_key,"/json/",lang,"/1/1000/")
   html <- GET(url)
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
@@ -69,17 +68,17 @@ getEcosList <- function(ECOS_key=ECOS_key){
 
   }
   json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
-    dplyr::select(통계표코드=STAT_CODE,
-                       상위통계표코드=P_STAT_CODE,
-                       통계명=STAT_NAME,
-                       주기=CYCLE,출처=ORG_NAME,
-                       검색가능여부=SRCH_YN)
+    dplyr::select(STAT_CODE,
+                  P_STAT_CODE,
+                  STAT_NAME,
+                  CYCLE,
+                  ORG_NAME,
+                  SRCH_YN)
 }
 
 # retrieving stats details from ECOS
-
-getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
-  url <- paste0("http://ecos.bok.or.kr/api/StatisticItemList/",ECOS_key,"/json/kr/1/1000/",STAT_CODE)
+getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE,lang="kr"){
+  url <- paste0("http://ecos.bok.or.kr/api/StatisticItemList/",ECOS_key,"/json/",lang,"/1/1000/",STAT_CODE)
   html <- GET(url)
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
@@ -92,32 +91,23 @@ getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
 
   }
   json_all[[1]][[2]] %>% tibble::as_tibble() %>%
-    dplyr::select(통계표코드 = STAT_CODE,
-                       통계명 =	STAT_NAME	,
-                       항목그룹코드 = GRP_CODE,
-                       항목그룹	= GRP_NAME,
-                       상위통계항목코드	= P_ITEM_CODE,
-                       통계항목코드	= ITEM_CODE,
-                       통계항목명	= ITEM_NAME,
-                       주기	= CYCLE,
-                       수록시작일자	= START_TIME,
-                       수록종료일자	= END_TIME,
-                       자료수	= DATA_CNT,
-                       가중치 = WEIGHT)
+    dplyr::select(STAT_CODE,
+                  STAT_NAME	,
+                  GRP_CODE,
+                  GRP_NAME,
+                  P_ITEM_CODE,
+                  ITEM_CODE,
+                  ITEM_NAME,
+                  CYCLE,
+                  START_TIME,
+                  END_TIME,
+                  DATA_CNT,
+                  WEIGHT)
 }
 
-
-
-
-# ECOS API period setting
-EcosTerm <- function(time,type){
-  case_when(type=="MM" ~  as.yearmon(time) %>% format(.,"%Y%m"),
-            type=="QQ" ~   as.yearqtr(time) %>% format(.,"%Y%q"),
-            TRUE ~ as.character(year(time)))
-}
-
-getKeyStats <- function(ECOS_key=ECOS_key){
-  url <- paste0("http://ecos.bok.or.kr/api/KeyStatisticList/",ECOS_key,"/json/kr/1/100/")
+# ECOS 100 Key statistics
+getKeyStats <- function(ECOS_key=ECOS_key,lang="kr"){
+  url <- paste0("http://ecos.bok.or.kr/api/KeyStatisticList/",ECOS_key,"/json/",lang,"/1/100/")
   html <- GET(url)
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
@@ -130,20 +120,31 @@ getKeyStats <- function(ECOS_key=ECOS_key){
 
   }
   json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
-    dplyr::select(통계그룹명=CLASS_NAME,
-                       통계명=KEYSTAT_NAME,
-                       시점=CYCLE,
-                       값=DATA_VALUE,
-                       단위=UNIT_NAME)
+    dplyr::select(CLASS_NAME,
+                  KEYSTAT_NAME,
+                  CYCLE,
+                  DATA_VALUE,
+                  UNIT_NAME)
 }
 
-
+# ECOS statistics and code search
 ecosSearch <- function(x) {
   data <- readRDS("Rdata/EcosStatsList.rds")
-  search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
+  search <- data %>% transmute(search=str_c(STAT_NAME,ITEM_NAME,STAT_NAME_EN,ITEM_NAME_EN,sep=" ")) %>% pull()
   flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
   data %>% filter(flag) %>% distinct()
 }
+
+
+# ECOS API period setting
+EcosTerm <- function(time,type){
+  case_when(type=="MM" ~  as.yearmon(time) %>% format(.,"%Y%m"),
+            type=="QQ" ~   as.yearqtr(time) %>% format(.,"%Y%q"),
+            TRUE ~ as.character(year(time)))
+}
+
+
+
 
 ## 2. KSIS API
 

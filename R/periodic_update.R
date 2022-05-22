@@ -3,155 +3,129 @@ if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(pa
 sapply(packages,require,character.only=TRUE)
 
 rm(list=ls())
-
-# 1. Functions -----------------------------------------------------------------
-
-# retrieving stats list from ECOS
-
-getEcosList <- function(ECOS_key=ECOS_key){
-  url <- paste0("https://ecos.bok.or.kr/api/StatisticTableList/",ECOS_key,"/json/kr/1/1000/")
-  html <- httr::GET(url)
-  res <- rawToChar(html$content)
-  Encoding(res) <- "UTF-8"
-  json_all <- fromJSON(res)
-  
-  if (!is.null(json_all$RESULT)){
-    code <- json_all$RESULT$CODE	
-    msg  <- json_all$RESULT$MESSAGE	
-    stop(paste0(code, "\n ", msg))
-    
-  }
-  json_all[[1]][[2]] %>%  tibble::as_tibble() %>% 
-    dplyr::select(통계표코드=STAT_CODE, 
-                       상위통계표코드=P_STAT_CODE,
-                       통계명=STAT_NAME, 
-                       주기=CYCLE,출처=ORG_NAME, 
-                       검색가능여부=SRCH_YN)
-}
-
-# retrieving stats details from ECOS
-
-getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE){
-  url <- paste0("http://ecos.bok.or.kr/api/StatisticItemList/",ECOS_key,"/json/kr/1/1000/",STAT_CODE)
-  html <- GET(url)
-  res <- rawToChar(html$content)
-  Encoding(res) <- "UTF-8"
-  json_all <- fromJSON(res)
-  
-  if (!is.null(json_all$RESULT)){
-    code <- json_all$RESULT$CODE	
-    msg  <- json_all$RESULT$MESSAGE	
-    stop(paste0(code, "\n ", msg))
-    
-  }
-  json_all[[1]][[2]] %>% tibble::as_tibble() %>% 
-    dplyr::select(통계표코드 = STAT_CODE,	
-                       통계명 =	STAT_NAME	,
-                       항목그룹코드 = GRP_CODE,	
-                       항목그룹	= GRP_NAME,	
-                       상위통계항목코드	= P_ITEM_CODE,	
-                       통계항목코드	= ITEM_CODE,	
-                       통계항목명	= ITEM_NAME,	
-                       주기	= CYCLE,	
-                       수록시작일자	= START_TIME,	
-                       수록종료일자	= END_TIME,	
-                       자료수	= DATA_CNT,	
-                       가중치 = WEIGHT) 
-}
-
-ecosSearch <- function(x) {
-  data <- readRDS("Rdata/EcosStatsList.rds")
-  search <- data %>% transmute(search=str_c(통계명,통계항목명,sep=" ")) %>% pull()
-  flag <- map(x, ~str_detect(search,.x)) %>% reduce(magrittr::multiply_by) %>% as.logical()
-  data %>% filter(flag)
-}
-
-
-getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_code1, 
-                        item_code2, item_code3){
-  
-  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/kr/1/500",
-               stat_code,period, start_time, end_time, item_code1, item_code2, item_code3,"", sep = "/")
-  html <- GET(url)
-  res <- rawToChar(html$content)
-  Encoding(res) <- "UTF-8"
-  json_all <- fromJSON(res)
-  
-  if (!is.null(json_all$RESULT)){
-    
-    code <- json_all$RESULT$CODE	
-    msg  <- json_all$RESULT$MESSAGE	
-    
-    stop(paste0(code, "\n ", msg))
-    
-  }
-  json_all[[1]][[2]] %>%  dplyr::select(TIME,DATA_VALUE)
-}
-
-
-# 2. Script --------------------------------------------------------------------
+source("R/Functions.R")
 
 ECOS_key <- Sys.getenv(x="ECOS_key")
 
-EcosTable <- getEcosList(ECOS_key = ECOS_key) %>% as_tibble()
+# 1. Script --------------------------------------------------------------------
 
-CODE_LIST <- EcosTable %>% filter(검색가능여부=="Y") %>% pull(통계표코드)
+# ECOS STATS CODE LIST
+EcosTable <- getEcosList(ECOS_key = ECOS_key,lang="en")
 
-safe_getEcosCode <-  safely(.f=function(x) getEcosCode(ECOS_key = ECOS_key, STAT_CODE = x))
+CODE_LIST <- EcosTable %>% filter(SRCH_YN=="Y") %>% pull(STAT_CODE)
 
-EcosStatsList <- map(CODE_LIST, safe_getEcosCode) %>%
-                  transpose() %>%
-                  pluck("result") %>%
-                  bind_rows() %>%
-                  arrange(통계명,통계항목코드)
+safe_getEcosCode_kr <-  safely(.f=function(x) getEcosCode(ECOS_key = ECOS_key, STAT_CODE = x, lang="kr"))
+safe_getEcosCode_en <-  safely(.f=function(x) getEcosCode(ECOS_key = ECOS_key, STAT_CODE = x, lang="en"))
+
+EcosStatsList_kr <- map(CODE_LIST, safe_getEcosCode_kr) %>%
+                      transpose() %>%
+                      pluck("result") %>%
+                      bind_rows() %>%
+                      arrange(STAT_NAME,ITEM_CODE)
+
+EcosStatsList_en <- map(CODE_LIST, safe_getEcosCode_en) %>%
+                      transpose() %>%
+                      pluck("result") %>%
+                      bind_rows() %>%
+                      arrange(STAT_NAME,ITEM_CODE)
+
+key <- c('STAT_CODE','ITEM_CODE','DATA_CNT')
+EcosStatsList <- union(
+              select(EcosStatsList_kr, all_of(key)),
+              select(EcosStatsList_en, all_of(key))) %>% 
+              left_join(EcosStatsList_kr, by=key) %>% 
+              left_join(EcosStatsList_en %>% 
+                        select(all_of(key), STAT_NAME_EN=STAT_NAME,ITEM_NAME_EN=ITEM_NAME),
+                        by=key)
+
 saveRDS(EcosStatsList,"Rdata/EcosStatsList.rds")
+write.csv(EcosStatsList,"Output/EcosStatsList.csv")
 
 
-data_code <- ecosSearch(c("거시경제분석 지표")) %>% 
-  filter(자료수 >0) %>% 
-  pull(통계항목코드) %>% unique()
+# KEY STATISTICS
+KeyStats <- getKeyStats(ECOS_key=ECOS_key, lang="kr") %>% 
+              bind_cols(getKeyStats(ECOS_key=ECOS_key, lang="en") %>% 
+                           select(KEYSTAT_NAME_EN=KEYSTAT_NAME)) %>% 
+              select(CLASS_NAME,KEYSTAT_NAME,KEYSTAT_NAME_EN,CYCLE,DATA_VALUE,UNIT_NAME)
 
-data_name <- ecosSearch(c("거시경제분석 지표")) %>% 
-  filter(자료수 >0) %>% 
-  pull(통계항목명)
+saveRDS(KeyStats,"Rdata/KeyStats.rds")
+write.csv(KeyStats,"Output/KeyStats.csv")
 
-safe_getEcosData <- safely(.f=function(x) getEcosData(ECOS_key = ECOS_key, 
+
+# ECOS MACRO DATA
+data_code <- ecosSearch(c("Macro Economic Analysis")) %>% 
+  filter(DATA_CNT >0) %>% select(STAT_CODE,ITEM_CODE,ITEM_NAME,ITEM_NAME_EN,CYCLE) %>% distinct()
+
+
+safe_getEcosData_M <- safely(.f=function(x) getEcosData(ECOS_key = ECOS_key, 
                                                       stat_code="901Y001", 
                                                       period="MM", 
-                                                      start_time="19901", 
+                                                      start_time="199001", 
                                                       end_time=today() %>% format(format="%Y%m"), 
                                                       item_code1=x, 
                                                       item_code2="?", 
                                                       item_code3="?"))
 
+safe_getEcosData_Q <- safely(.f=function(x) getEcosData(ECOS_key = ECOS_key, 
+                                                        stat_code="901Y001", 
+                                                        period="QQ", 
+                                                        start_time="19901", 
+                                                        end_time=today() %>% format(format="%Y%q"), 
+                                                        item_code1=x, 
+                                                        item_code2="?", 
+                                                        item_code3="?"))
 
-ecos_macro_raw <- map(data_code, safe_getEcosData) %>% 
-                    transpose() %>% 
-                    pluck("result") 
-
-if(detect_index(ecos_macro_raw,is.null)>0) data_name <- data_name[-detect_index(ecos_macro_raw,is.null)] 
-
-
-ecos_macro <- ecos_macro_raw %>% 
-                compact() %>% 
-                reduce(left_join, by="TIME") %>% 
-                set_names(c("yearM",data_name)) %>% 
-                as_tibble() %>% 
-                mutate(yearM=as.yearmon(yearM,format="%Y%m")) %>% 
-                mutate(across(.cols=-1,.fns=as.numeric))
-
-
-saveRDS(ecos_macro,"Output/ecos_macro.rds")
-
-
-wb <- createWorkbook()
-addWorksheet(wb,"ecos_macro")
-writeData(wb,"ecos_macro",ecos_macro,startCol=1,startRow=1,rowNames=FALSE)
-saveWorkbook(wb,"Output/ecos_macro_data.xlsx",overwrite = TRUE)
-rm(list=ls())
+safe_getEcosData_Y <- safely(.f=function(x) getEcosData(ECOS_key = ECOS_key, 
+                                                        stat_code="901Y001", 
+                                                        period="YY", 
+                                                        start_time="1990", 
+                                                        end_time=today() %>% format(format="%Y"), 
+                                                        item_code1=x, 
+                                                        item_code2="?", 
+                                                        item_code3="?"))
 
 
+ecos_macro_raw_M <- map(data_code$ITEM_CODE, safe_getEcosData_M) %>% 
+  transpose() %>% 
+  pluck("result") %>% 
+  set_names(data_code$ITEM_CODE) %>% 
+  compact()
+
+ecos_macro_M <- ecos_macro_raw_M %>% 
+  reduce(left_join, by="TIME") %>% 
+  as_tibble() %>% 
+  set_names(c("yearM",names(ecos_macro_raw_M))) %>% 
+  mutate(yearM=as.yearmon(yearM,format="%Y%m")) %>% 
+  mutate(across(.cols=-1,.fns=as.numeric))
+
+ecos_macro_raw_Q <- map(data_code$ITEM_CODE, safe_getEcosData_Q) %>% 
+  transpose() %>% 
+  pluck("result") %>% 
+  set_names(data_code$ITEM_CODE) %>% 
+  compact()
+
+ecos_macro_Q <- ecos_macro_raw_Q %>% 
+  reduce(left_join, by="TIME") %>% 
+  as_tibble() %>% 
+  set_names(c("yearQ",names(ecos_macro_raw_Q))) %>% 
+  mutate(yearM=as.yearqtr(yearQ,format="%Y%q")) %>% 
+  mutate(across(.cols=-1,.fns=as.numeric))
+
+ecos_macro_raw_Y <- map(data_code$ITEM_CODE, safe_getEcosData_Y) %>% 
+  transpose() %>% 
+  pluck("result") %>% 
+  set_names(data_code$ITEM_CODE) %>% 
+  compact()
+
+ecos_macro_Y <- ecos_macro_raw_Y %>% 
+  reduce(left_join, by="TIME") %>% 
+  as_tibble() %>% 
+  set_names(c("year",names(ecos_macro_raw_Y))) %>% 
+  mutate(year=as.numeric(year)) %>% 
+  mutate(across(.cols=-1,.fns=as.numeric))
 
 
-
+saveRDS(ecos_macro_M,"Rdata/ecos_macro_raw_M.rds")
+saveRDS(ecos_macro_Q,"Rdata/ecos_macro_raw_Q.rds")
+saveRDS(ecos_macro_Y,"Rdata/ecos_macro_raw_Y.rds")
 
