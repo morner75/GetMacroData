@@ -1,4 +1,4 @@
-packages <- c("tidyverse","tidymodels","xts","lubridate","stringr","broom","quantreg","foreach")
+packages <- c("tidyverse","tidymodels","xts","lubridate","stringr","broom","quantreg","foreach","rlang")
 if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(packages %in% installed.packages())], dependencies = TRUE)
 sapply(packages,require,character.only=TRUE)
 
@@ -126,13 +126,39 @@ pca_fit %>%
   theme_minimal()
 
 
-## 1.2. Quantile regression
+## 1.2. Choose principal components
+# define function
+select_component <- function(data=pca_data_aug, var){
+var1 <- abs(cor({pca_data_aug %>% 
+        select(all_of(var),starts_with("PC"))})[1,][-1]) %>% 
+        .[.==max(.)] %>% names()
+
+var2 <- {pca_data_aug %>% 
+        select(starts_with("PC")) %>% 
+        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1)),data=pca_data_aug)),.before=1) %>% 
+        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
+
+var3 <- {pca_data_aug %>% 
+        select(starts_with("PC")) %>% 
+        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1,"+",var2)),data=pca_data_aug)),.before=1) %>% 
+        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
+
+c(var1,var2,var3)
+}
 
 # target variable 
 target <- c("RGDP_QG","HOUSE_QG","CPI_QG",'USDKRW_Q',"INT_KTB3Y_Q")
+pca_data_aug <- pca_data_aug %>% rename_with(.fn=~str_remove(.x,pattern=".fitted"))
+reg_components <- map(target, ~select_component(var=.x)) %>% set_names(target)
+
+
+## 1.3. Quantile regression
+
+# target variable 
+components <- reg_components %>% unlist() %>% unname()
 
 quant_data <- pca_data_aug %>% 
-              select(yearQ, all_of(target), PC1=.fittedPC1,PC2=.fittedPC2,PC3=.fittedPC3,PC4=.fittedPC4)
+              select(yearQ, all_of(c(target,components)))
 quant_dataL <- quant_data %>% 
                pivot_longer(-yearQ) %>% 
                mutate(vartype=ifelse(str_detect(name,"^PC"),"predictors","responses"))
@@ -142,56 +168,87 @@ ggplot(quant_dataL,aes(yearQ,value,group=name,color=name))+
   facet_wrap(~vartype, ncol=1,scales="free_y")+
   theme_minimal()
 
+# define Anything_at_Risk function
 
-# prediction k=1,2,3,4,5,6,7,8,9,10,11,12
+Anything_at_Risk <- function(var,pred_terms=12,quant_data=quant_data, components=components, tau=c(0.1,0.25,0.5,0.75,0.9)){
+  
+Res <- foreach(lead_period=1:pred_terms,.combine=rbind) %do% {
 
-# 1.2.1. RGDP_QG
-response <- "RGDP_QG"
-formula = as.formula(paste0(response," ~ PC1 + PC2 +PC3")) 
+  #var <- "HOUSE_QG";lead_period=1;quant_data=quant_data;components=reg_component[[var]];tau=c(0.1,0.5,0.9)
+  formula = as.formula(str_c(var," ~ ", paste(components,sep = "",collapse = " + ")))
+  
+  model_data <- quant_data %>% 
+                mutate({{var}}:=lead(.data[[var]],n=lead_period)) %>% 
+                drop_na()
+  
+  mod <- map(tau, function(.x) rq(formula,.x,data=model_data))
+  
+  fitted_data <- map(mod, ~{augment(.x, model_data) %>% 
+                            select(yearQ,
+                            all_of(attr(attr(terms(formula),"factors"),"dimnames")[[1]]),
+                            .fitted)})
+  fitted_data_aug <- reduce(fitted_data,
+                            .f=function(.x,.y) 
+                               left_join(.x,.y,by=c("yearQ",var,components))) %>%
+                     set_names(c("yearQ", attr(attr(terms(formula),"factors"),"dimnames")[[1]],as.character(tau)))
 
-Res <- foreach(lead_period=1:12,.combine=rbind) %do% {
-lead_period <- 1
+  # ggplot(tidy_results,aes(yearQ,`0.5`))+
+  #   geom_line()+
+  #   geom_ribbon(aes(ymin=`0.1`,ymax=`0.9`),fill="lightblue",alpha=0.5)+
+  #   #   geom_ribbon(aes(ymin=`0.25`,ymax=`0.75`),fill="blue",alpha=0.5)+
+  #   facet_wrap(~var,ncol=2,scales="free_y")+
+  #   theme_minimal()
+  
 
-model_data <- quant_data %>% 
-              mutate(RGDP_QG=lead(RGDP_QG,n=lead_period)) %>% 
-              drop_na()
-
-mod <- map(c(0.1,0.5,0.9), function(.x) rq(formula,.x,data=model_data))
-
-fitted_data <- map(mod, ~{augment(.x, model_data) %>% 
-                          select(yearQ,
-                          all_of(attr(attr(terms(formula),"factors"),"dimnames")[[1]]),
-                          .fitted)})
-fitted_data_aug <- reduce(fitted_data,.f=function(.x,.y) left_join(.x,.y,by=c("yearQ","RGDP_QG","PC1","PC2","PC3"))) %>%
-                   set_names(c("yearQ", attr(attr(terms(formula),"factors"),"dimnames")[[1]],"lower","med","upper"))
-
-# ggplot(fitted_data_aug,aes(yearQ,med))+
-#   geom_line()+
-#   geom_ribbon(aes(ymin=lower,ymax=upper),fill="lightblue",alpha=0.5)+
-#   geom_point(aes(y=RGDP_QG))+
-#   theme_minimal()
-
-eval <- fitted_data_aug %>% 
-        mutate(eval=ifelse(RGDP_QG<=lower|RGDP_QG>=upper,1,0)) %>% 
+  eval <- fitted_data_aug %>% 
+        mutate(eval=ifelse(.data[[var]]<=.data[[as.character(tau[1])]]|
+                           .data[[var]]>=.data[[as.character(tau[length(tau)])]],1,0)) %>% 
         summarise(eval=mean(eval)) %>% unlist()
 
-prediction <- map_dbl(mod, ~predict.rq(.x,newdata=quant_data %>% slice_tail())) %>% 
-              set_names("lower","med","upper")
+  prediction <- map_dbl(mod, ~predict.rq(.x,newdata=quant_data %>% slice_tail())) %>% 
+                set_names(as.character(tau))
 
 c(prediction, eval)
 }
 
 
-RGDP_QG_toOrignScale <- (scaling_info %>% filter(name=="RGDP_QG") %>% pull(sd))*Res[,1:3]+
-                        (scaling_info %>% filter(name=="RGDP_QG") %>% pull(mean))
+toOriginScale <-{(scaling_info %>% filter(name==var) %>% pull(sd))*Res[,1:length(tau)]+
+                (scaling_info %>% filter(name==var) %>% pull(mean)) } %>% 
+                as_tibble() %>% 
+                mutate(yearQ=as.yearqtr(seq(as.Date(pull(quant_data,yearQ) %>% last()),
+                                            by="quarter",length.out=pred_terms+1)[-1])) %>% 
+                select(yearQ,everything())
+
+list(.pred=toOriginScale,.eval=Res[,length(tau)+1] %>% unname())
+}
+
+
+# Analysis
+Results <- map(target, 
+               ~Anything_at_Risk(.x,pred_terms=12,
+                                 components=reg_components[[.x]],
+                                 quant_data=quant_data,
+                                 tau=c(0.05,0.5,0.95))) %>% 
+           set_names(target)
+
+tidy_results <- Results %>% transpose() %>% pluck(".pred") %>% map_dfr(~.x,.id="var")
+
+ggplot(tidy_results,aes(yearQ,`0.5`))+
+   geom_line()+
+   geom_ribbon(aes(ymin=`0.05`,ymax=`0.95`),fill="lightblue",alpha=0.5)+
+#   geom_ribbon(aes(ymin=`0.25`,ymax=`0.75`),fill="blue",alpha=0.5)+
+   facet_wrap(~var,ncol=2,scales="free_y")+
+   theme_minimal()
+
+evals <- Results %>% transpose() %>% pluck(".eval")
 
 
 
- 
 
 
 
 
+##
 
 
 group1 <- c('INT_TS_Q',"INT_KTB3Y_VOL_Q",'INT_KTB3Y_Q','INT_KTB10Y_Q',
