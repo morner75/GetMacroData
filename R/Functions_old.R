@@ -60,12 +60,12 @@ getEcosList <- function(ECOS_key=ECOS_key,lang="kr"){
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
   json_all <- fromJSON(res)
-  
+
   if (!is.null(json_all$RESULT)){
     code <- json_all$RESULT$CODE
     msg  <- json_all$RESULT$MESSAGE
     stop(paste0(code, "\n ", msg))
-    
+
   }
   json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
     dplyr::select(STAT_CODE,
@@ -83,12 +83,12 @@ getEcosCode <- function(ECOS_key=ECOS_key,STAT_CODE,lang="kr"){
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
   json_all <- fromJSON(res)
-  
+
   if (!is.null(json_all$RESULT)){
     code <- json_all$RESULT$CODE
     msg  <- json_all$RESULT$MESSAGE
     stop(paste0(code, "\n ", msg))
-    
+
   }
   json_all[[1]][[2]] %>% tibble::as_tibble() %>%
     dplyr::select(STAT_CODE,
@@ -112,12 +112,12 @@ getKeyStats <- function(ECOS_key=ECOS_key,lang="kr"){
   res <- rawToChar(html$content)
   Encoding(res) <- "UTF-8"
   json_all <- fromJSON(res)
-  
+
   if (!is.null(json_all$RESULT)){
     code <- json_all$RESULT$CODE
     msg  <- json_all$RESULT$MESSAGE
     stop(paste0(code, "\n ", msg))
-    
+
   }
   json_all[[1]][[2]] %>%  tibble::as_tibble() %>%
     dplyr::select(CLASS_NAME,
@@ -200,11 +200,11 @@ getFsisData <- function(api_key=api_key,finance_cd="0010001",list_no="SA053",acc
 
 # BIS DB 생성
 getBISDB <- function(){
-  bisDB_url <- 'https://www.bis.org/statistics/full_data_sets.htm'
-  bisDB_nodes <- bisDB_url %>%  
-    xml2::read_html() %>% 
-    rvest::html_nodes(xpath = "//a[contains(@href, 'zip')]") 
-  tibble(name = rvest::html_text(bisDB_nodes), url = str_c('https://www.bis.org',rvest::html_attr(bisDB_nodes,"href")))
+bisDB_url <- 'https://www.bis.org/statistics/full_data_sets.htm'
+bisDB_nodes <- bisDB_url %>%  
+  xml2::read_html() %>% 
+  rvest::html_nodes(xpath = "//a[contains(@href, 'zip')]") 
+tibble(name = rvest::html_text(bisDB_nodes), url = str_c('https://www.bis.org',rvest::html_attr(bisDB_nodes,"href")))
 }
 
 
@@ -237,7 +237,7 @@ makeVariable <- function(data, type=c("growth","diff","vol","logdiff","EMWAvol")
             type=="diff" ~ data-lag(data,n=terms),
             type=="vol"~ c(rep(NA_real_,terms-1),map_dbl(terms:n, function(i) sd(data[(i-terms+1):i]))),
             type=="EWMAvol"~ c(rep(NA_real_,terms), sqrt((1-lambda)*data[(terms+1):n]^2+
-                                                           lambda*map_dbl(terms:n, function(i) sd(data[(i-terms+1):i]))[-1]^2)),
+                                                     lambda*map_dbl(terms:n, function(i) sd(data[(i-terms+1):i]))[-1]^2)),
             TRUE ~ NA_real_)
 }
 
@@ -256,10 +256,10 @@ makeVariable <- function(data, type=c("growth","diff","vol","logdiff","EMWAvol")
 # level data cleansing
 levelCleansingECOS <- function(DATA,name,period=c("MM","QQ","YY")) {
   if(period=="QQ"){
-    DATA[[name]]%>% transmute(time=as.yearqtr(TIME,format="%Y%q"), val=as.double(DATA_VALUE)) %>%  
+      DATA[[name]]%>% transmute(time=as.yearqtr(TIME,format="%Y%q"), val=as.double(DATA_VALUE)) %>%  
       set_names(c("yearQ",name))
   }else if(period=="YY"){
-    DATA[[name]]%>% transmute(year=as.numeric(TIME), val=as.double(DATA_VALUE)) %>% 
+      DATA[[name]]%>% transmute(year=as.numeric(TIME), val=as.double(DATA_VALUE)) %>% 
       set_names(c("year",name))
   }else if(period=="MM"){
     DATA[[name]]%>% transmute(time=as.yearmon(TIME,format="%Y%m"), val=as.double(DATA_VALUE)) %>%
@@ -299,7 +299,7 @@ Obtain_DebtQECOS <- function(work_needed_data,DATA) {
 
 # monthly to quarterly data
 mon2qtrECOS <- function(DATA,name) DATA[[name]] %>% transmute(yearQ=as.yearqtr(ym(TIME)),val=as.double(DATA_VALUE)) %>% 
-  group_by(yearQ) %>% summarise(mean_val=mean(val),.groups="drop") %>% set_names(c("yearQ",name))
+                               group_by(yearQ) %>% summarise(mean_val=mean(val),.groups="drop") %>% set_names(c("yearQ",name))
 
 # monthly to annual data
 mon2yearECOS <- function(DATA,name) DATA[[name]] %>% transmute(year=year(ymd(paste0(TIME,"-01"))),val=as.double(DATA_VALUE)) %>% 
@@ -313,179 +313,12 @@ Obtain_DebtYECOS <- function(work_needed_data,DATA) {
   map(work_needed_data, ~levelCleansingECOS(DATA,.x,"YY")) %>% reduce(full_join,by="year") %>% 
     set_names(c("year","DEBT3","DEBT2","DEBT1")) %>%  
     arrange(year) %>% mutate(DEBT3=replace(DEBT3,DEBT3==0,NA),DEBT2=replace(DEBT2,DEBT2==0,NA)) %>% 
-    mutate(ratio1=mean(DEBT1/DEBT2,na.rm=TRUE),
-           ratio2=mean(DEBT2/DEBT3,na.rm=TRUE)) %>% 
-    mutate(DEBT3=DEBT3*ratio1*ratio2,DEBT2=DEBT2*ratio1,
-           DEBT=case_when(is.na(DEBT1) & is.na(DEBT2) ~ DEBT3,
-                          is.na(DEBT1) ~ DEBT2,
-                          TRUE ~ DEBT1)) %>% select(year,DEBT) 
-} 
-
-
-
-
-##############################################################################
-#
-# Part III. Anything_at_Risk functions
-#
-##############################################################################
-
-
-
-## 1. Component selection: Choosing most relevant components 
-
-select_component <- function(data, var, pred_terms=12, no.var=6){
-  
-  #data=pca_data_aug ; var="RGDP_QG";  pred_terms=1; lead_period=1
-  
-  foreach(lead_period=1:pred_terms,.combine=cbind) %do% {  
-    
-    data.adj <- data %>% select(all_of(var),matches("^PC([1-9]|[1-3][0-9])$")) %>% 
-      mutate({{var}}:=lead(.data[[var]],n=lead_period)) %>% 
-      drop_na()
-    
-    var1 <- {cor(data.adj) %>% abs()}[1,][-1] %>% 
-      .[.==max(.)] %>% names()
-    
-    var2 <- {data.adj %>% 
-        select(starts_with("PC")) %>% 
-        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1)),data=data.adj)),.before=1) %>% 
-        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
-    
-    var3 <- {data.adj %>% 
-        select(starts_with("PC")) %>% 
-        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1,"+",var2)),data=data.adj)),.before=1) %>% 
-        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
-    
-    var4 <- {data.adj %>% 
-        select(starts_with("PC")) %>% 
-        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1,"+",var2,"+",var3)),data=data.adj)),.before=1) %>% 
-        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
-    
-    var5 <- {data.adj %>% 
-        select(starts_with("PC")) %>% 
-        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1,"+",var2,"+",var3,"+",var4)),data=data.adj)),.before=1) %>% 
-        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
-    
-    var6 <- {data.adj %>% 
-        select(starts_with("PC")) %>% 
-        mutate(resid=resid(lm(as.formula(paste0(var," ~ ",var1,"+",var2,"+",var3,"+",var4,"+",var5)),data=data.adj)),.before=1) %>% 
-        cor() %>% abs()}[1,][-1] %>% .[.==max(.)] %>% names()
-    
-    
-    c(var1,var2,var3,var4,var5,var6)
-  } %>% 
-    as_tibble() %>% 
-    set_names(str_c("term_",1:pred_terms)) %>% 
-    slice_head(n=no.var)
-}
-
-## 2. Anything_at_Risk function (IMF GaR methods)
-
-Anything_at_Risk <- function(var,pred_terms=12,quant_data=quant_data, components=components, tau=c(0.1,0.25,0.5,0.75,0.9),scaling_info){
-  
-  #var <- "USDKRW_Q";pred_terms=8;quant_data=quant_data;components=reg_components[[var]];tau=c(0.1,0.5,0.9)
-  
-  Res <- foreach(lead_period=1:pred_terms,.combine=rbind) %do% {
-    
-    # var <- "HOUSE_QG";lead_period=1;quant_data=quant_data;components=reg_components[[var]];tau=c(0.1,0.5,0.9)
-    component_each=components[[str_c("term_",lead_period)]]
-    
-    formula = as.formula(str_c(var," ~ ", paste(component_each,sep = "",collapse = " + ")))
-    
-    model_data <- quant_data %>% 
-      mutate({{var}}:=lead(.data[[var]],n=lead_period)) %>% 
-      drop_na()
-    
-    mod <- map(tau, function(.x) rq(formula,.x,data=model_data))
-    
-    fitted_data <- map(mod, ~{augment(.x, model_data) %>% 
-        select(yearQ,
-               all_of(attr(attr(terms(formula),"factors"),"dimnames")[[1]]),
-               .fitted)})
-    fitted_data_aug <- reduce(fitted_data,
-                              .f=function(.x,.y) 
-                                left_join(.x,.y,by=c("yearQ",var,component_each))) %>%
-      set_names(c("yearQ", attr(attr(terms(formula),"factors"),"dimnames")[[1]],as.character(tau)))
-    
-    
-    eval_quant <- fitted_data_aug %>% 
-      mutate(eval=ifelse(.data[[var]]<=.data[[as.character(tau[1])]]|
-                           .data[[var]]>=.data[[as.character(tau[length(tau)])]],1,0)) %>% 
-      summarise(eval=mean(eval)) %>% unlist()
-    
-    prediction <- map_dbl(mod, ~predict.rq(.x,newdata=quant_data %>% slice_tail())) %>% 
-      set_names(as.character(tau))
-    
-    eval_fitted <- fitted_data_aug %>% mutate(eval_pred=abs(.data[[var]]-`0.5`)) %>% pull(eval_pred) %>% mean()
-    
-    c(prediction, eval_quant,eval_fitted)
-  }
-  
-  
-  toOriginScale <-{(scaling_info %>% filter(name==var) %>% pull(sd))*Res[,1:length(tau)]+
-      (scaling_info %>% filter(name==var) %>% pull(mean)) } %>% 
-    as_tibble() %>% 
-    mutate(yearQ=as.yearqtr(seq(as.Date(pull(quant_data,yearQ) %>% last()),
-                                by="quarter",length.out=pred_terms+1)[-1])) %>% 
-    select(yearQ,everything())
-  
-  list(.pred=toOriginScale,.eval_quant=Res[,length(tau)+1] %>% unname(),.eval_fitted=Res[,ncol(Res)] %>% unname())
-}
-
-
-# Auto
-
-Auto_Anything_at_Risk <- function(data_selected, start_quarter,end_quarter,target){
-  
-  #data_selected=data_selected0 ;  start_quarter = "2012 Q1" ; end_quarter = "2021 Q4" ;target="USDKRW_Q"
-  start_yearQ <- start_quarter %>% as.yearqtr() %>% as.numeric()
-  end_yearQ <- end_quarter %>% as.yearqtr() %>% as.numeric()
-  
-  
-  var_na <- data_selected0 %>% 
-    filter(yearQ>=start_yearQ, yearQ<=end_yearQ) %>% 
-    is.na() %>% 
-    colSums() %>% 
-    .[.>0]
-  
-  # selected variables
-  data_selected <- data_selected0 %>% select(yearQ,!any_of(names(var_na))) %>% 
-    filter(yearQ>=start_yearQ, yearQ<=end_yearQ) 
-  
-  # define function
-  scale <- function(x) (x - mean(x))/sd(x)
-  
-  # scaled data
-  data_scaled <- data_selected %>% 
-    mutate_if(is.numeric,scale) 
-  
-  scaling_info <- data_scaled %>% 
-    pivot_longer(-yearQ) %>% 
-    group_by(name) %>% 
-    summarise(mean=mean(value,na.rm=TRUE),sd=sd(value,na.rm=TRUE)) 
-  
-  # data preparation
-  pca_data_aug <- data_scaled %>% 
-    select(-yearQ) %>% 
-    prcomp(scale = FALSE) %>%  
-    augment(data_scaled) 
-  
-  
-  # target variable 
-  pca_data_aug <- pca_data_aug %>% rename_with(.fn=~str_remove(.x,pattern=".fitted"))
-  reg_components <- map(target, ~select_component(data=pca_data_aug, var=.x,no.var=5)) %>% set_names(target)
-  components <- reg_components %>% unlist() %>% unname()
-  quant_data <- pca_data_aug %>%  select(yearQ, all_of(c(target,components)))
-  
-  Results <- map(target, 
-                 ~Anything_at_Risk(.x,pred_terms=8,
-                                   components=reg_components[[.x]] %>% slice_head(n=2),
-                                   quant_data=quant_data,
-                                   tau=c(0.05,0.5,0.95),scaling_info)) %>% 
-    set_names(target)
-  return(Results)
-}
-
+                            mutate(ratio1=mean(DEBT1/DEBT2,na.rm=TRUE),
+                           ratio2=mean(DEBT2/DEBT3,na.rm=TRUE)) %>% 
+  mutate(DEBT3=DEBT3*ratio1*ratio2,DEBT2=DEBT2*ratio1,
+         DEBT=case_when(is.na(DEBT1) & is.na(DEBT2) ~ DEBT3,
+                           is.na(DEBT1) ~ DEBT2,
+                           TRUE ~ DEBT1)) %>% select(year,DEBT) 
+  } 
 
 
