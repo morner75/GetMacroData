@@ -7,9 +7,12 @@ rm(list=ls())
 
 ### 1. ECOSE data code list
 read_csv("InputFiles/data_description.csv",col_names =TRUE) %>% 
+  arrange(name,period) %>% 
   saveRDS(.,"Rdata/ecos_code_list.rds")
 
-
+# read_csv("InputFiles/data_description.csv",col_names =TRUE) %>% 
+#   arrange(name,period) %>% select(-1) %>% 
+#   write_csv("InputFiles/data_description.csv")
 
 ### 2. csv file based data
 

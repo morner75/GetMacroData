@@ -6,9 +6,10 @@ rm(list=ls())
 source("R/Functions.R")
 
 DATA <- readRDS("Rdata/ecos_data_raw.rds")
+
 required.data <- names(DATA)
 
-  
+
 ################################################################
 #
 # Part I. daily data
@@ -16,10 +17,10 @@ required.data <- names(DATA)
 ################################################################
 
 # daily data from ECOS
-daily.data <- str_subset(required.data,"_D$") %>% sort()
+daily.data <- str_subset(required.data,"_DG*$") %>% sort()
 StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>% 
-                reduce(full_join,by="date") %>% 
-                select(date,sort(names(.)))
+  reduce(full_join,by="date") %>% 
+  select(date,sort(names(.)))
 
 ################################################################
 #
@@ -29,7 +30,7 @@ StarsDataD <- map(daily.data,~levelCleansingECOS(DATA,.x,"DD")) %>%
 
 
 # monthly data from ECOS
-monthly.data <- str_subset(required.data,"_M$") %>% sort()
+monthly.data <- str_subset(required.data,"_M[GA]*$") %>% sort()
 StarsDataM <- map(monthly.data,~levelCleansingECOS(DATA,.x,"MM")) %>% 
   reduce(full_join,by="yearM") 
 
@@ -39,16 +40,16 @@ StarsDataM <- rows_patch(StarsDataM,
                          readRDS("Rdata/macro_file_data.rds")[["KOSPI_M"]] %>% 
                            filter(yearM>=1990))
 StarsDataM <- StarsDataD %>% 
-                mutate(yearM=as.yearmon(date)) %>% 
-                group_by(yearM) %>% 
-                summarise(KOSPI_VOL_M=sd(KOSPI_D,na.rm=TRUE)) %>% 
-                ungroup() %>% 
-                right_join(StarsDataM,by="yearM")
+  mutate(yearM=as.yearmon(date)) %>% 
+  group_by(yearM) %>% 
+  summarise(KOSPI_VOL_M=sd(KOSPI_D,na.rm=TRUE)) %>% 
+  ungroup() %>% 
+  right_join(StarsDataM,by="yearM")
 
 # MSCIW
 StarsDataM <- readRDS("Rdata/macro_file_data.rds")[["MSCIW_M"]] %>%
-                filter(yearM>=1990) %>% 
-                right_join(StarsDataM,by="yearM") 
+  filter(yearM>=1990) %>% 
+  right_join(StarsDataM,by="yearM") 
 
 
 # REER 
@@ -74,15 +75,17 @@ StarsDataM<-  bis_REER %>%
   arrange(yearM)
 
 
+
 StarsDataM <-  StarsDataM %>% 
   mutate(INT_CS_M = INT_AAm3Y_M-INT_KTB3Y_M,
          INT_TS_M = INT_KTB10Y_M-INT_CALL_M,
          KOSPI_MG = makeVariable(KOSPI_M,type="growth",terms=1),
          MSCIW_MG = makeVariable(MSCIW_M,type="growth",terms=1),
-         HOUSE_MG= makeVariable(HOUSE_M,type="growth",terms=1))
+         HOUSE_MG= makeVariable(HOUSE_M,type="growth",terms=1),
+         CPI_MG= makeVariable(CPI_M,type="growth",terms=12))
 
 StarsDataM <- StarsDataM %>% 
-  select(yearM,sort(names(.)))
+  select(yearM,sort(names(.))) 
 
 ################################################################
 #
@@ -90,7 +93,7 @@ StarsDataM <- StarsDataM %>%
 #
 ################################################################
 
-quarterly.data <- str_subset(required.data,"_QG*$") %>% sort()
+quarterly.data <- str_subset(required.data,"_Q[GA)]*$") %>% sort()
 
 StarsDataQ <- map(quarterly.data %>% 
                     str_subset(.,".*DEBT.*_Q$",negate = TRUE) %>% 
@@ -105,9 +108,9 @@ StarsDataQ <- map(quarterly.data %>%
 StarsDataQ <- anti_join(readRDS("Rdata/macro_file_data.rds")[["KOSPI_Q"]],
                         mon2qtrECOS(DATA,"KOSPI_M") %>% rename(KOSPI_Q=KOSPI_M),
                         by=c("yearQ")) %>% 
-              bind_rows(mon2qtrECOS(DATA,"KOSPI_M")%>% 
+  bind_rows(mon2qtrECOS(DATA,"KOSPI_M")%>% 
               rename(KOSPI_Q=KOSPI_M))  %>% 
-              right_join(StarsDataQ,by="yearQ")
+  right_join(StarsDataQ,by="yearQ")
 
 # HOUSE
 StarsDataQ <- mon2qtrECOS(DATA,"HOUSE_M") %>%
@@ -136,6 +139,14 @@ work_needed_data <- str_subset(required.data,"HH_DEBT._Q$")
 StarsDataQ <- Obtain_DebtQECOS(work_needed_data,DATA) %>% 
   set_names("yearQ","HH_DEBT_Q") %>% 
   right_join(StarsDataQ,by="yearQ")
+
+# adding GOV_DEBT
+work_needed_data <- str_subset(required.data,"GOV_DEBT._Q$") 
+StarsDataQ <- Obtain_DebtQECOS(work_needed_data,DATA) %>% 
+  set_names("yearQ","GOV_DEBT_Q") %>% 
+  right_join(StarsDataQ,by="yearQ")
+
+
 
 # adding CP_DEBT
 work_needed_data1 <- str_subset(required.data,"CP_DEBT._1_Q$") 
@@ -176,7 +187,7 @@ StarsDataQ <- StarsDataD %>%
             KOSPI_VOL_Q=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
   right_join(StarsDataQ,by="yearQ")
 
-# Residential permit, Foreing currency reserve, government balance (M to Q)
+# Residential permit, government balance (M to Q)
 StarsDataQ <- StarsDataM %>% 
   mutate(yearQ=as.yearqtr(yearM)) %>%
   group_by(yearQ) %>% 
@@ -211,7 +222,7 @@ StarsDataQ <-  StarsDataQ %>%
          EXT_DEBT_QG=makeVariable(EXT_DEBT_Q,type="growth",terms=1),
          RESID_PERMIT_QG=makeVariable(RESID_PERMIT_Q,type="growth",terms=4),
          GOV_QG=makeVariable(GOV_Q,type="growth",terms=4)
-         ) %>% 
+  ) %>% 
   arrange(yearQ) %>% 
   select(yearQ,sort(names(.)))
 
@@ -272,6 +283,12 @@ StarsDataY <- Obtain_DebtYECOS(work_needed_data,DATA) %>%
   set_names("year","HH_DEBT_Y") %>% 
   right_join(StarsDataY,by="year")
 
+# adding GOV_DEBT
+work_needed_data <- str_subset(required.data,"GOV_DEBT._Y$") 
+StarsDataY <- Obtain_DebtYECOS(work_needed_data,DATA) %>% 
+  set_names("year","GOV_DEBT_Y") %>% 
+  right_join(StarsDataY,by="year")
+
 # adding CP_DEBT
 work_needed_data1 <- str_subset(required.data,"CP_DEBT._1_Y$") 
 work_needed_data2 <-  str_subset(required.data,"CP_DEBT._2.*_Y$")
@@ -298,7 +315,7 @@ StarsDataY <- CP_DEBT1_Y %>%
             CP_DEBT_Y=CP_DEBT1_Y+CP_DEBT2_Y) %>% 
   right_join(StarsDataY,by="year") 
 
-# Interest coverage ration
+# Interest coverage ratio
 
 StarsDataY <- StarsDataQ %>% 
   mutate(year=year(yearQ)) %>% 
@@ -335,20 +352,29 @@ StarsDataY <-  StarsDataY %>%
 ################################################################
 
 ecos_macro <- readRDS("Rdata/ecos_macro.rds")
-StarsDataM <- ecos_macro %>% pluck("monthly") %>% 
-                pivot_wider(names_from = NAME) %>% 
-                left_join(StarsDataM,by="yearM") %>% 
-                select(yearM,all_of(names(.) %>% sort()))
 
-StarsDataQ <- ecos_macro %>% pluck("quarterly") %>% 
-                pivot_wider(names_from = NAME) %>% 
-                left_join(StarsDataQ,by="yearQ") %>% 
-                select(yearQ,all_of(names(.) %>% sort()))
+StarsDataM  <- ecos_macro %>% pluck("monthly") %>% 
+  pivot_wider(names_from = NAME) %>% 
+  left_join(StarsDataM,by="yearM") %>% 
+  select(yearM,all_of(names(.) %>% sort()))
+
+StarsDataQ <- ecos_macro %>% pluck("quarterly") %>%
+  bind_rows(
+      ecos_macro %>% pluck("monthly") %>%
+      mutate(yearQ=as.yearqtr(yearM)) %>%
+      filter(str_detect(NAME, "EXPORT_PRICE|IMPORT_PRICE|NET_TERMS_TRADE|OPERATION_RATIO|PPI|BAL|ACC",negate = TRUE)) %>%
+      group_by(yearQ,NAME) %>%
+      summarise(value=mean(value,na.rm=TRUE), .groups="drop") %>% 
+      mutate(NAME=str_replace(NAME,"_M","_Q")) 
+  ) %>%
+  pivot_wider(names_from = NAME) %>% 
+  left_join(StarsDataQ,by="yearQ") %>% 
+  select(yearQ,all_of(names(.) %>% sort()))
 
 StarsDataY <- ecos_macro %>% pluck("annual") %>% 
-                pivot_wider(names_from = NAME) %>% 
-                left_join(StarsDataY,by="year") %>% 
-                select(year,all_of(names(.) %>% sort()))
+  pivot_wider(names_from = NAME) %>% 
+  left_join(StarsDataY,by="year") %>% 
+  select(year,all_of(names(.) %>% sort()))
 
 list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
 
@@ -358,22 +384,22 @@ StatsDetails <- readRDS('Rdata/EcosStatsList.rds')
 StatsDescription <- code_list %>% 
   select(NAME=name,STAT_CODE=code,ITEM_CODE=sub1) %>% 
   mutate(PERIOD=str_extract(NAME,"_[YQMD][GA]?$") %>% 
-             str_sub(2,2) %>% 
-             factor(levels=c("Y","Q","M","D")),
-           .before=NAME) %>%
+           str_sub(2,2) %>% 
+           factor(levels=c("Y","Q","M","D")),
+         .before=NAME) %>%
   left_join(StatsDetails %>% 
               select(STAT_CODE,ITEM_CODE,STAT_NAME, ITEM_NAME,ITEM_NAME_EN),
             by=c("STAT_CODE","ITEM_CODE")) %>% 
   bind_rows(
-      map_dfr(c("M","Q","Y"), ~{ecos_macro %>% 
-                            pluck("description") %>% 
-                            mutate(PERIOD=.x,.before=NAME)}) %>% 
+    map_dfr(c("M","Q","Y"), ~{ecos_macro %>% 
+        pluck("description") %>% 
+        mutate(PERIOD=.x,.before=NAME)}) %>% 
       mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",
                          str_replace(NAME,"_G",str_c("_",PERIOD,"G")),
                          str_c(NAME,"_",PERIOD)))
   ) %>% 
   arrange(PERIOD,NAME)
-  
+
 
 wb <- createWorkbook()
 addWorksheet(wb,"quarterly")

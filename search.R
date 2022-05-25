@@ -3,7 +3,7 @@ if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(pa
 sapply(packages,require,character.only=TRUE)
 
 source("R/Functions.R")
-ecosSearch("DD") %>% View()
+ecosSearch("미국") %>% View()
 
 getEcosData(ECOS_key,'901Y001','MM',
             start_time=EcosTerm(start_date,'MM'),
