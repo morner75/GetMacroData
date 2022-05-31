@@ -330,8 +330,7 @@ StarsDataY <- StarsDataQ %>%
 StarsDataY <- StarsDataD %>% 
   mutate(year=year(date)) %>%
   group_by(year) %>% 
-  summarise(INT_KTB3Y_VOL_Y=sd(INT_KTB3Y_D,na.rm = TRUE),
-            KOSPI_VOL_Y=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
+  summarise(INT_KTB3Y_VOL_Y=sd(INT_KTB3Y_D,na.rm = TRUE)) %>% 
   right_join(StarsDataY,by="year")
 
 # Residential permit, government balance (M to Y)
