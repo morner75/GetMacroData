@@ -192,7 +192,6 @@ StarsDataQ <- StarsDataM %>%
   mutate(yearQ=as.yearqtr(yearM)) %>%
   group_by(yearQ) %>% 
   summarise(GOV_BAL_Q=sum(GOV_BAL_M),
-            MSCIW_VOL_Q=sd(MSCIW_MG,na.rm=TRUE),
             RESID_PERMIT_Q=sum(RESID_PERMIT_M)) %>% 
   right_join(StarsDataQ,by="yearQ")
 
@@ -225,6 +224,7 @@ StarsDataQ <-  StarsDataQ %>%
   ) %>% 
   arrange(yearQ) %>% 
   select(yearQ,sort(names(.)))
+
 
 
 
@@ -324,6 +324,27 @@ StarsDataY <- StarsDataQ %>%
             CP_DEBT2EQUITY_Y=mean(CP_DEBT2EQUITY_Q,na.rm=TRUE)) %>% 
   ungroup() %>% 
   right_join(StarsDataY,by="year") 
+
+
+# bond return volatility, stock return volatility (D to Y)
+StarsDataY <- StarsDataD %>% 
+  mutate(year=year(date)) %>%
+  group_by(year) %>% 
+  summarise(INT_KTB3Y_VOL_Y=sd(INT_KTB3Y_D,na.rm = TRUE),
+            KOSPI_VOL_Y=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
+  right_join(StarsDataY,by="year")
+
+# Residential permit, government balance (M to Y)
+StarsDataY <- StarsDataM %>% 
+  mutate(year=year(yearM)) %>%
+  group_by(year) %>% 
+  summarise(GOV_BAL_Y=sum(GOV_BAL_M,na.rm=TRUE),
+            REER_NB_VOL_Y=sd(REER_NB_M,na.rm=TRUE),
+            REER_BB_VOL_Y=sd(REER_BB_M,na.rm=TRUE),
+            MSCIW_VOL_Y=sd(MSCIW_MG,na.rm=TRUE),
+            RESID_PERMIT_Y=sum(RESID_PERMIT_M,na.rm=TRUE)) %>% 
+  right_join(StarsDataY,by="year")
+
 
 
 
