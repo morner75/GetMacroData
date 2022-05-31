@@ -341,7 +341,8 @@ StarsDataY <- StarsDataM %>%
             REER_NB_VOL_Y=sd(REER_NB_M,na.rm=TRUE),
             REER_BB_VOL_Y=sd(REER_BB_M,na.rm=TRUE),
             MSCIW_VOL_Y=sd(MSCIW_MG,na.rm=TRUE),
-            RESID_PERMIT_Y=sum(RESID_PERMIT_M,na.rm=TRUE)) %>% 
+            RESID_PERMIT_Y=sum(RESID_PERMIT_M,na.rm=TRUE),
+            INT_BASE_Y=mean(INT_BASE_M,na.rm=TRUE)) %>% 
   right_join(StarsDataY,by="year")
 
 
