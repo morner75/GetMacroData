@@ -368,18 +368,39 @@ StarsDataY <-  StarsDataY %>%
 
 ################################################################
 #
-# Part V. save data
+# Part V. ata augmentation with ecos_macro
 #
 ################################################################
 
 ecos_macro <- readRDS("Rdata/ecos_macro.rds")
 
-StarsDataM  <- ecos_macro %>% pluck("monthly") %>% 
+macroDataM <- macroDataQ <- macroDataY <- NULL
+
+macroDataM  <- ecos_macro %>% pluck("monthly") %>% 
   pivot_wider(names_from = NAME) %>% 
-  left_join(StarsDataM,by="yearM") %>% 
+  left_join(StarsDataM,by="yearM")
+
+var_M1 <- paste0(c('ALL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
+                  'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ'),'_M')
+var_M2 <- paste0(c('US_CPI','RESID_PERMIT',"CRRNT_ACC","FIN_ACC","GOODS_BAL","SERVICES_BAL"),'_M')
+
+macroDataM <- macroDataM %>% 
+  bind_cols(
+      macroDataM %>% 
+        select(all_of(var_M1)) %>% 
+        mutate_all(.funs=~(.x/lag(.x)-1)*100) %>% 
+        set_names(paste0(var_M1,"G"))
+      ) %>% 
+  bind_cols(
+    macroDataM %>% 
+      select(all_of(var_M2)) %>% 
+      mutate_all(.funs=~(.x/lag(.x,12)-1)*100) %>% 
+      set_names(paste0(var_M2,"G"))
+  ) %>% 
   select(yearM,all_of(names(.) %>% sort()))
 
-StarsDataQ <- ecos_macro %>% pluck("quarterly") %>%
+
+macroDataQ <- ecos_macro %>% pluck("quarterly") %>%
   bind_rows(
       ecos_macro %>% pluck("monthly") %>%
       mutate(yearQ=as.yearqtr(yearM)) %>%
@@ -392,12 +413,90 @@ StarsDataQ <- ecos_macro %>% pluck("quarterly") %>%
   left_join(StarsDataQ,by="yearQ") %>% 
   select(yearQ,all_of(names(.) %>% sort()))
 
-StarsDataY <- ecos_macro %>% pluck("annual") %>% 
+var_Q1 <- paste0(c('AL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
+                   'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ',
+                   'GOV_DEBT','IAIP','IMPORT','EXPORT','CN_EXPORT','CN_IMPORT',
+                   'US_IAIP','US_EXPORT','US_IMPORT'),'_Q')
+var_Q2 <- paste0(c('CN_CPI','US_CPI','CRRNT_ACC','GOV_BAL',
+                   "FIN_ACC","GOODS_BAL","SERVICES_BAL"),'_Q')
+
+macroDataQ <- macroDataQ %>% 
+  bind_cols(
+    macroDataQ %>% 
+      select(all_of(var_Q1)) %>% 
+      mutate_all(.funs=~(.x/lag(.x)-1)*100) %>% 
+      set_names(paste0(var_Q1,"G"))
+  ) %>% 
+  bind_cols(
+    macroDataQ %>% 
+      select(all_of(var_Q2)) %>% 
+      mutate_all(.funs=~(.x/lag(.x,4)-1)*100) %>% 
+      set_names(paste0(var_Q2,"G"))
+  ) %>% 
+  select(yearQ,all_of(names(.) %>% sort()))
+
+
+MtoY <- macroDataM %>% 
+  pivot_longer(-yearM,names_to="NAME",values_to = "value") %>% 
+  mutate(year=year(yearM)) %>% 
+  filter(str_detect(NAME, "CN_HANGSENG|CORN|EURIBOR3M|GOLD|US_CPI|US_DOWJONES|US_LIBOR3M|US_NASDAQ|US_TBill6M|US_TBond30Y|US_TNote10Y|US_TNote5Y"),
+         str_detect(NAME, "_MG",negate=TRUE)) %>%
+  group_by(year,NAME) %>%
+  summarise(value=mean(value,na.rm=TRUE), .groups="drop") %>% 
+  mutate(NAME=str_replace(NAME,"_M","_Y")) %>% 
+  pivot_wider(names_from=NAME,values_from = value)
+
+
+QtoY_sum <- macroDataQ %>% 
+  pivot_longer(-yearQ,names_to="NAME",values_to = "value") %>% 
+  mutate(year=year(yearQ)) %>% 
+  filter(str_detect(NAME, "CN_EXPORT|CN_IMPORT|EXPORT|IMPORT|US_EXPORT|US_IMPORT")) %>%
+           group_by(year,NAME) %>%
+           summarise(value=sum(value,na.rm=TRUE), .groups="drop") %>% 
+           mutate(NAME=str_replace(NAME,"_Q","_Y")) %>% 
+           pivot_wider(names_from=NAME,values_from = value)
+         
+QtoY_mean <- macroDataQ %>% 
+   pivot_longer(-yearQ,names_to="NAME",values_to = "value") %>% 
+   mutate(year=year(yearQ)) %>% 
+   filter(str_detect(NAME, "US_IAIP|IAIP|CN_CPI")) %>%
+            group_by(year,NAME) %>%
+            summarise(value=mean(value,na.rm=TRUE), .groups="drop") %>% 
+            mutate(NAME=str_replace(NAME,"_Q","_Y")) %>% 
+            pivot_wider(names_from=NAME,values_from = value)
+
+macroDataY <- ecos_macro %>% pluck("annual") %>% 
   pivot_wider(names_from = NAME) %>% 
   left_join(StarsDataY,by="year") %>% 
+  left_join(MtoY, by="year") %>%
+  left_join(QtoY_sum,by="year") %>%
+  left_join(QtoY_mean,by="year") %>%
+  mutate(CP_DEBT2GDP_Y=CP_DEBT_Y/RGDP_Y,
+         HH_DEBT2GDP_Y=HH_DEBT_Y/RGDP_Y) %>% 
   select(year,all_of(names(.) %>% sort()))
 
-list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
+var_Y <- paste0(c('AL','CN_HANGSENG','CORN' ,'CP_DEBT','CU','CPI','CRRNT_ACC',
+                  'FOREIGN_RESERVES','GOV_BAL',"FIN_ACC","GOODS_BAL",'GOLD',
+                   'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ',
+                   'HH_DI','GOV_DEBT','HH_DEBT',
+                   'US_CPI',"SERVICES_BAL",'RGDP','NGDP','MSCIW','GOV'),'_Y')
+
+macroDataY <- macroDataY %>% 
+  bind_cols(
+    macroDataY %>% 
+      select(all_of(var_Y)) %>% 
+      mutate_all(.funs=~(.x/lag(.x)-1)*100) %>% 
+      set_names(paste0(var_Y,"G"))
+  ) %>% 
+  select(year,all_of(names(.) %>% sort()))
+
+
+
+# setdiff(names(macroDataQ) %>% str_subset("_Q$")%>% str_sub(1,-3) ,
+#         names(macroDataY) %>% str_subset("_Y$") %>% str_sub(1,-3)  )
+
+
+list(quarterly=macroDataQ, annual=macroDataY, monthly=macroDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
 
 # data explanation
 code_list <- readRDS('Rdata/ecos_code_list.rds')
@@ -420,6 +519,13 @@ StatsDescription <- code_list %>%
                          str_c(NAME,"_",PERIOD)))
   ) %>% 
   arrange(PERIOD,NAME)
+
+
+################################################################
+#
+# Part VI. save data
+#
+################################################################
 
 
 wb <- createWorkbook()

@@ -12,7 +12,7 @@ StarsDataQ <- readRDS('Output/macro_data.rds')[["quarterly"]]
 
 # Step1: variable selection  : types - growth, level, etc.
 variable_type1 <- names(StarsDataQ) %>% 
-                    str_subset("_QG$|^INT_|RATIO|RATE|.+2.+|BAL|VOL")
+                    str_subset("_QG$|INT_|RATIO|RATE|.+2.+|BAL|VOL")
 
 variable_type2 <- c("AL_Q","CP_INTCOVERAGE_Q","CRRNT_ACC_Q","CU_Q","EMP_Q",  
                     "FIN_ACC_Q","GDP_DF_Q","NET_TERMS_TRADE_Q","NI_Q","OIL_Q","REER_BB_Q",
@@ -20,13 +20,11 @@ variable_type2 <- c("AL_Q","CP_INTCOVERAGE_Q","CRRNT_ACC_Q","CU_Q","EMP_Q",
 
 # selected variables and remove linear dependent varialbes
 data_selected0 <- StarsDataQ %>% 
-                  select(all_of(c("yearQ",variable_type1,variable_type2)) %>% sort(),
-                         -c(CONSTRCTN_INVEST_QG,CRRNT_BAL_Q,EQUIP_INVEST_QG,
-                            DEBT_QG,DEBT2GDP_Q,HOUSE2INCOME_Q,HH_DEBT_QG))  
+                  select(all_of(c("yearQ",variable_type1,variable_type2)) %>% sort())  
 
 ## Step2 : Handling NAs (no observations)      
 
-start_yearQ <- "2000 Q1" %>% as.yearqtr() %>% as.numeric()
+start_yearQ <- "2007 Q1" %>% as.yearqtr() %>% as.numeric()
 end_yearQ <- "2022 Q1" %>% as.yearqtr() %>% as.numeric()
 
 
