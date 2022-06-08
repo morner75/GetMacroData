@@ -10,9 +10,9 @@ read_csv("InputFiles/data_description.csv",col_names =TRUE) %>%
   arrange(name,period) %>% 
   saveRDS(.,"Rdata/ecos_code_list.rds")
 
-# read_csv("InputFiles/data_description.csv",col_names =TRUE) %>% 
-#   arrange(name,period) %>% select(-1) %>% 
-#   write_csv("InputFiles/data_description.csv")
+read_csv("InputFiles/data_description2.csv",col_names =TRUE) %>% 
+  arrange(VAR) %>% 
+  saveRDS(.,"Rdata/ecos_code_list2.rds")
 
 ### 2. csv file based data
 

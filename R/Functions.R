@@ -34,7 +34,7 @@ year2date <- function(year) ymd(str_c(year,"-12-31"))
 getEcosData <- function(ECOS_key, stat_code, period, start_time, end_time, item_code1, 
                         item_code2, item_code3, lang="kr"){
   
-  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json/",lang,"/1/10000",
+  url <- paste("http://ecos.bok.or.kr/api/StatisticSearch",ECOS_key,"json",lang,"1/10000",
                stat_code,period, start_time, end_time, item_code1, item_code2, item_code3,"", sep = "/")
   html <- GET(url)
   res <- rawToChar(html$content)
@@ -138,12 +138,10 @@ ecosSearch <- function(x) {
 
 # ECOS API period setting
 EcosTerm <- function(time,type){
-  case_when(type=="MM" ~  as.yearmon(time) %>% format(.,"%Y%m"),
-            type=="QQ" ~   as.yearqtr(time) %>% format(.,"%Y%q"),
+  case_when(type=="M" ~  as.yearmon(time) %>% format(.,"%Y%m"),
+            type=="Q" ~ as.yearqtr(time) %>% format(.,"%YQ%q"),
             TRUE ~ as.character(year(time)))
 }
-
-
 
 
 ## 2. KSIS API

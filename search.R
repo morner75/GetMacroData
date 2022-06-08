@@ -3,9 +3,9 @@ if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(pa
 sapply(packages,require,character.only=TRUE)
 
 source("R/Functions.R")
-ecosSearch("미국") %>% View()
+ecosSearch("국제상품가격") %>% View()
 
-getEcosData(ECOS_key,'901Y001','MM',
-            start_time=EcosTerm(start_date,'MM'),
-            end_time =EcosTerm(today(),'MM'),
-            'AI1DC','?','?') 
+getEcosData(ECOS_key,'902Y015','M',
+            start_time=EcosTerm(start_date,'M'),
+            end_time =EcosTerm(today(),'M'),
+            'USA','?','?') 

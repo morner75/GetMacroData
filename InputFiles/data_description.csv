@@ -1,164 +1,164 @@
-name,code,sub1,sub2,sub3,period,note
-AL_Q,I10Y004,4020802,?,?,QQ,NA
-AL_Y,I10Y004,4020802,?,?,YY,NA
-AL_M,I10Y004,4020802,?,?,MM,NA
-CN_CPI_Q,I10Y022,CN,?,?,QQ,NA
-CN_EXPORT_Q,I10Y034,CN,?,?,QQ,NA
-CN_HANGSENG_M,I10Y002,3020114,?,?,MM,NA
-CN_HANGSENG_Q,I10Y002,3020114,?,?,QQ,NA
-CN_IMPORT_Q,I10Y035,CN,?,?,QQ,NA
-CN_RGDP_QG,I10Y041,CHN,?,?,QQ,NA
-CN_RGDP_YG,I10Y041,CHN,?,?,YY,NA
-CORN_M,I10Y004,4020701,?,?,MM,NA
-CORN_Q,I10Y004,4020701,?,?,QQ,NA
-CP_ASSET_Y,027Y601,ZZZ00,A,110000,YY,NA
-CP_CAPITAL_Y,027Y601,ZZZ00,A,124000,YY,NA
-CP_DEBT1_1_Q,012Y502,4040000,L,D4000,QQ,NA
-CP_DEBT1_1_Y,012Y502,4040000,L,D4000,YY,NA
-CP_DEBT1_2_Q,012Y502,4050000,L,D4000,QQ,NA
-CP_DEBT1_2_Y,012Y502,4050000,L,D4000,YY,NA
-CP_DEBT2_1_Q,012Y102,304000,L,C3000,QQ,NA
-CP_DEBT2_1_Y,012Y102,304000,L,C3000,YY,NA
-CP_DEBT2_2_Q,012Y102,305000,L,C3000,QQ,NA
-CP_DEBT2_2_Y,012Y102,305000,L,C3000,YY,NA
-CP_DEBT2EQUITY_Q,027Y217,1000,A,3000,QQ,NA
-CP_DEBT3_1_Q,012Y002,205000,2,C220,QQ,NA
-CP_DEBT3_1_Y,012Y002,205000,2,C220,YY,NA
-CP_DEBT3_21_Q,012Y002,206000,2,C220,QQ,NA
-CP_DEBT3_21_Y,012Y002,206000,2,C220,YY,NA
-CP_DEBT3_22_Q,012Y002,208000,2,C220,QQ,NA
-CP_DEBT3_22_Y,012Y002,208000,2,C220,YY,NA
-CP_INTCOVERAGE_Q,027Y216,1000,A,6000,QQ,NA
-CPI_M,021Y125,0,?,?,MM,NA
-CPI_Q,021Y125,0,?,?,QQ,NA
-CPI_Y,021Y125,0,?,?,YY,NA
-CU_M,I10Y004,4020801,?,?,MM,NA
-CU_Q,I10Y004,4020801,?,?,QQ,NA
-CU_Y,I10Y004,4020801,?,?,YY,NA
-EMP_Q,080Y034,I61E,I28A,?,QQ,NA
-EMP_QA,080Y034,I61E,I28B,?,QQ,adjusted
-EMP_Y,080Y034,I61E,I28A,?,YY,NA
-EURIBOR3M_M,I10Y001,1030601,?,?,MM,NA
-EURIBOR3M_Q,I10Y001,1030601,?,?,QQ,NA
-EXPORT_Q,I10Y034,KR,?,?,QQ,NA
-EXT_DEBT_Q,039Y108,A000000,?,?,QQ,NA
-EXT_DEBT_Y,039Y108,A000000,?,?,YY,NA
-GDP_DF_Q,111Y046,1400,?,?,QQ,NA
-GDP_DF_Y,111Y046,1400,?,?,YY,NA
-GOLD_M,I10Y004,4020401,?,?,MM,NA
-GOLD_Q,I10Y004,4020401,?,?,QQ,NA
-GOV_BAL_M,028Y009,C,?,?,MM,NA
-GOV_DEBT1_Q,012Y502,4000000,L,D3000,QQ,NA
-GOV_DEBT1_Y,012Y502,4000000,L,D3000,YY,NA
-GOV_DEBT2_Q,012Y102,300000,L,C2000,QQ,NA
-GOV_DEBT2_Y,012Y102,300000,L,C2000,YY,NA
-GOV_DEBT3_Q,012Y002,200000,2,C170,QQ,NA
-GOV_DEBT3_Y,012Y002,200000,2,C170,YY,NA
-GOV_Q,111Y014,1010120,?,?,QQ,NA
-GOV_Y,111Y014,1010120,?,?,YY,NA
-HH_ASSET_FIN_Y,104Y405,SEC04,2,?,YY,NA
-HH_ASSET_NONFIN_Y,104Y405,SEC04,1,?,YY,NA
-HH_DEBT1_Q,012Y502,4050000,L,D5000,QQ,NA
-HH_DEBT1_Y,012Y502,4050000,L,D5000,YY,NA
-HH_DEBT2_Q,012Y102,305000,L,C4000,QQ,NA
-HH_DEBT2_Y,012Y102,305000,L,C4000,YY,NA
-HH_DEBT3_Q,012Y002,208000,2,C290,QQ,NA
-HH_DEBT3_Y,012Y002,208000,2,C290,YY,NA
-HH_DI_Y,111Y019,1020130,?,?,YY,nominal
-HH_MORT_Q,008Y001,11000A0,?,?,QQ,NA
-HH_MORT_Y,008Y001,11000A0,?,?,YY,NA
-HOUSE_M,085Y021,P63A,?,?,MM,KB
-IAIP_Q,I10Y051,KOR,?,?,QQ,NA
-IMPORT_Q,I10Y035,KR,?,?,QQ,NA
-INT_AAm3Y_D,060Y001,010300000,?,?,DD,NA
-INT_AAm3Y_M,028Y001,BEEA472,?,?,MM,NA
-INT_AAm3Y_Q,028Y001,BEEA472,?,?,QQ,NA
-INT_AAm3Y_Y,028Y001,BEEA472,?,?,YY,NA
-INT_BASE_D,098Y001,0101000,?,?,DD,NA
-INT_BASE_M,098Y001,0101000,?,?,MM,NA
-INT_BASE_Q,098Y001,0101000,?,?,QQ,NA
-INT_BBBm3Y_D,060Y001,010320000,?,?,DD,NA
-INT_BBBm3Y_M,028Y001,BEEA473,?,?,MM,NA
-INT_BBBm3Y_Q,028Y001,BEEA473,?,?,QQ,NA
-INT_BBBm3Y_Y,028Y001,BEEA473,?,?,YY,NA
-INT_BOK1Y_D,060Y001,010400000,?,?,DD,NA
-INT_BOK1Y_M,028Y001,BEEA43,?,?,MM,NA
-INT_BOK1Y_Q,028Y001,BEEA43,?,?,QQ,NA
-INT_BOK1Y_Y,028Y001,BEEA43,?,?,YY,NA
-INT_CALL_D,060Y001,010101000,?,?,DD,NA
-INT_CALL_M,028Y001,BEEA14,?,?,MM,NA
-INT_CALL_Q,028Y001,BEEA14,?,?,QQ,NA
-INT_CALL_Y,028Y001,BEEA14,?,?,YY,NA
-INT_CD91_D,060Y001,010502000,?,?,DD,NA
-INT_CD91_M,028Y001,BEEA21,?,?,MM,NA
-INT_CD91_Q,028Y001,BEEA21,?,?,QQ,NA
-INT_CD91_Y,028Y001,BEEA21,?,?,YY,NA
-INT_CP91_D,060Y001,010503000,?,?,DD,NA
-INT_CP91_M,028Y001,BEEA31,?,?,MM,NA
-INT_CP91_Q,028Y001,BEEA31,?,?,QQ,NA
-INT_CP91_Y,028Y001,BEEA31,?,?,YY,NA
-INT_KTB10Y_D,060Y001,010210000,?,?,DD,NA
-INT_KTB10Y_M,028Y001,BEEA422,?,?,MM,NA
-INT_KTB10Y_Q,028Y001,BEEA422,?,?,QQ,NA
-INT_KTB10Y_Y,028Y001,BEEA422,?,?,YY,NA
-INT_KTB1Y_D,060Y001,010190000,?,?,DD,NA
-INT_KTB1Y_M,028Y001,BEEA411,?,?,MM,NA
-INT_KTB1Y_Q,028Y001,BEEA411,?,?,QQ,NA
-INT_KTB1Y_Y,028Y001,BEEA411,?,?,YY,NA
-INT_KTB2Y_D,060Y001,010195000,?,?,DD,NA
-INT_KTB2Y_M,028Y001,BEEA426,?,?,MM,NA
-INT_KTB2Y_Q,028Y001,BEEA426,?,?,QQ,NA
-INT_KTB2Y_Y,028Y001,BEEA426,?,?,YY,NA
-INT_KTB3Y_D,060Y001,010200000,?,?,DD,NA
-INT_KTB3Y_M,028Y001,BEEA42,?,?,MM,NA
-INT_KTB3Y_Q,028Y001,BEEA42,?,?,QQ,NA
-INT_KTB3Y_Y,028Y001,BEEA42,?,?,YY,NA
-INT_KTB5Y_D,060Y001,010200001,?,?,DD,NA
-INT_KTB5Y_M,028Y001,BEEA421,?,?,MM,NA
-INT_KTB5Y_Q,028Y001,BEEA421,?,?,QQ,NA
-INT_KTB5Y_Y,028Y001,BEEA421,?,?,YY,NA
-KOSPI_D,064Y001,0001000,?,?,DD,NA
-KOSPI_M,901Y001,AI1CG,?,?,MM,NA
-KOSPI_Y,901Y001,AI1CG,?,?,YY,NA
-NGDP_Q,111Y010,1400,?,?,QQ,NA
-NGDP_Y,111Y010,1400,?,?,YY,NA
-NI_M,I10Y004,4020404,?,?,MM,NA
-NI_Q,I10Y004,4020404,?,?,QQ,NA
-NI_Y,I10Y004,4020404,?,?,YY,NA
-OIL_M,I10Y004,4010101,?,?,MM,NA
-OIL_Q,I10Y004,4010101,?,?,QQ,NA
-OIL_Y,I10Y004,4010101,?,?,YY,NA
-RESID_PERMIT_M,085Y138,ALL,?,?,MM,NA
-RGDP_Q,111Y011,1400,?,?,QQ,NA
-RGDP_QA,111Y013,1400,?,?,QQ,NA
-RGDP_Y,111Y011,1400,?,?,YY,NA
-UNEMP_MA,I10Y052,KOR,?,?,MM,adjusted
-UNEMP_QA,I10Y052,KOR,?,?,QQ,adjusted
-UNEMP_Y,I10Y052,KOR,?,?,YY,NA
-US_CPI_M,I10Y022,US,?,?,MM,NA
-US_CPI_Q,I10Y022,US,?,?,QQ,NA
-US_DOWJONES_M,I10Y002,3020101,?,?,MM,NA
-US_DOWJONES_Q,I10Y002,3020101,?,?,QQ,NA
-US_EXPORT_Q,I10Y034,US,?,?,QQ,NA
-US_IAIP_Q,I10Y051,USA,?,?,QQ,NA
-US_IMPORT_Q,I10Y035,US,?,?,QQ,NA
-US_LIBOR3M_M,I10Y001,1030401,?,?,MM,NA
-US_LIBOR3M_Q,I10Y001,1030401,?,?,QQ,NA
-US_NASDAQ_M,I10Y002,3020103,?,?,MM,NA
-US_NASDAQ_Q,I10Y002,3020103,?,?,QQ,NA
-US_RGDP_QG,I10Y041,USA,?,?,QQ,NA
-US_RGDP_YG,I10Y041,USA,?,?,YY,NA
-US_TBill6M_M,I10Y001,1020302,?,?,MM,NA
-US_TBill6M_Q,I10Y001,1020302,?,?,QQ,NA
-US_TBond30Y_M,I10Y001,1020501,?,?,MM,NA
-US_TBond30Y_Q,I10Y001,1020501,?,?,QQ,NA
-US_TNote10Y_M,I10Y001,1020403,?,?,MM,NA
-US_TNote10Y_Q,I10Y001,1020403,?,?,QQ,NA
-US_TNote5Y_M,I10Y001,1020402,?,?,MM,NA
-US_TNote5Y_Q,I10Y001,1020402,?,?,QQ,NA
-US_UNEMP_QA,I10Y052,USA,?,?,QQ,NA
-US_UNEMP_MA,I10Y052,USA,?,?,MM,NA
-USDKRW_D,036Y001,0000001,?,?,DD,NA
-USDKRW_M,036Y004,0000001,0000100,?,MM,mean
-USDKRW_Q,036Y004,0000001,0000100,?,QQ,mean
-USDKRW_Y,036Y004,0000001,0000100,?,YY,mean
+"name","code","sub1","sub2","sub3","period","description","description_eng","note"
+"AL_Q","902Y003","4020802","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"AL_Y","902Y003","4020802","?","?","A","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"AL_M","902Y003","4020802","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"CN_CPI_Q","902Y008","CN","?","?","Q","9.1.2.2. 국제 주요국 소비자물가지수","9.1.2.2. Consumer Price indices",NA
+"CN_EXPORT_Q","902Y012","CN","?","?","Q","9.1.3.4. 국제 주요국 수출(통관기준)","9.1.3.4. Goods, Value of Exports, Free on board (FOB), US Dollars",NA
+"CN_HANGSENG_M","902Y002","3020114","?","?","M","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"CN_HANGSENG_Q","902Y002","3020114","?","?","Q","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"CN_IMPORT_Q","902Y013","CN","?","?","Q","9.1.3.5. 국제 주요국 수입(통관기준)","9.1.3.5. Goods, Value of Imports, Cost, Insurance, Freight (CIF), US Dollars",NA
+"CN_RGDP_QG","902Y015","CHN","?","?","Q","9.1.4.1. 국제 주요국 경제성장률","9.1.4.1. Growth Rate of GDP",NA
+"CN_RGDP_YG","902Y015","CHN","?","?","A","9.1.4.1. 국제 주요국 경제성장률","9.1.4.1. Growth Rate of GDP",NA
+"CORN_M","902Y003","4020701","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"CORN_Q","902Y003","4020701","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"CP_ASSET_Y","501Y001","ZZZ00","A","110000","A","5.3.1. 재무상태표(제10차 한국표준산업분류, 2009~)","5.3.1. Balance Sheet(10th revised KSIC, 2009~, complete enumeration)",NA
+"CP_CAPITAL_Y","501Y001","ZZZ00","A","124000","A","5.3.1. 재무상태표(제10차 한국표준산업분류, 2009~)","5.3.1. Balance Sheet(10th revised KSIC, 2009~, complete enumeration)",NA
+"CP_DEBT1_1_Q","281Y002","4040000","L","D4000","Q","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"CP_DEBT1_1_Y","281Y002","4040000","L","D4000","A","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"CP_DEBT1_2_Q","281Y002","4050000","L","D4000","Q","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"CP_DEBT1_2_Y","281Y002","4050000","L","D4000","A","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"CP_DEBT2_1_Q","281Y007","304000","L","C3000","Q","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"CP_DEBT2_1_Y","281Y007","304000","L","C3000","A","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"CP_DEBT2_2_Q","281Y007","305000","L","C3000","Q","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"CP_DEBT2_2_Y","281Y007","305000","L","C3000","A","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"CP_DEBT2EQUITY_Q","502Y003","1000","A","3000","Q","5.2.3. 자산/자본 지표","5.2.3. Relationship Ratios of Assets, Liablitilies and Stockholders Equity",NA
+"CP_DEBT3_1_Q","281Y005","205000","2","C220","Q","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_DEBT3_1_Y","281Y005","205000","2","C220","A","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_DEBT3_21_Q","281Y005","206000","2","C220","Q","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_DEBT3_21_Y","281Y005","206000","2","C220","A","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_DEBT3_22_Q","281Y005","208000","2","C220","Q","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_DEBT3_22_Y","281Y005","208000","2","C220","A","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"CP_INTCOVERAGE_Q","502Y002","1000","A","6000","Q","5.2.2. 수익성 지표","5.2.2. Relationship Ratios of Income and Expenses",NA
+"CPI_M","901Y009","0","?","?","M","4.2.1. 소비자물가지수","4.2.1. Consumer Price indices(2015=100)",NA
+"CPI_Q","901Y009","0","?","?","Q","4.2.1. 소비자물가지수","4.2.1. Consumer Price indices(2015=100)",NA
+"CPI_Y","901Y009","0","?","?","A","4.2.1. 소비자물가지수","4.2.1. Consumer Price indices(2015=100)",NA
+"CU_M","902Y003","4020801","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"CU_Q","902Y003","4020801","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"CU_Y","902Y003","4020801","?","?","A","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"EMP_Q","901Y027","I61E","I28A","?","Q","8.6.2. 경제활동인구","8.6.2. Summary of Economically Active Pop.",NA
+"EMP_QA","901Y027","I61E","I28B","?","Q","8.6.2. 경제활동인구","8.6.2. Summary of Economically Active Pop.","adjusted"
+"EMP_Y","901Y027","I61E","I28A","?","A","8.6.2. 경제활동인구","8.6.2. Summary of Economically Active Pop.",NA
+"EURIBOR3M_M","902Y001","1030601","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"EURIBOR3M_Q","902Y001","1030601","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"EXPORT_Q","902Y012","KR","?","?","Q","9.1.3.4. 국제 주요국 수출(통관기준)","9.1.3.4. Goods, Value of Exports, Free on board (FOB), US Dollars",NA
+"EXT_DEBT_Q","311Y004","A000000","?","?","Q","2.6.2.1. 대외채무","2.6.2.1. External Debt",NA
+"EXT_DEBT_Y","311Y004","A000000","?","?","A","2.6.2.1. 대외채무","2.6.2.1. External Debt",NA
+"GDP_DF_Q","200Y011","1400","?","?","Q","2.1.2.3.1. 경제활동별 국내총생산 디플레이터(분기 및 연간)","2.1.2.3.1. GDP Deflator by Economic Activities (not seasonally adjusted, quarterly & annual)",NA
+"GDP_DF_Y","200Y011","1400","?","?","A","2.1.2.3.1. 경제활동별 국내총생산 디플레이터(분기 및 연간)","2.1.2.3.1. GDP Deflator by Economic Activities (not seasonally adjusted, quarterly & annual)",NA
+"GOLD_M","902Y003","4020401","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"GOLD_Q","902Y003","4020401","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"GOV_BAL_M","901Y013","C","?","?","M","1.5.4.1. 통합재정수지","1.5.4.1. Central Governmnet Fiscal Balance",NA
+"GOV_DEBT1_Q","281Y002","4000000","L","D3000","Q","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"GOV_DEBT1_Y","281Y002","4000000","L","D3000","A","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"GOV_DEBT2_Q","281Y007","300000","L","C2000","Q","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"GOV_DEBT2_Y","281Y007","300000","L","C2000","A","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"GOV_DEBT3_Q","281Y005","200000","2","C170","Q","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"GOV_DEBT3_Y","281Y005","200000","2","C170","A","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"GOV_Q","200Y009","1010120","?","?","Q","2.1.2.2.3. 국내총생산에 대한 지출(원계열, 명목, 분기 및 연간)","2.1.2.2.3. Expenditures on GDP (not seasonally adjusted, current prices, quarterly & annual)",NA
+"GOV_Y","200Y009","1010120","?","?","A","2.1.2.2.3. 국내총생산에 대한 지출(원계열, 명목, 분기 및 연간)","2.1.2.2.3. Expenditures on GDP (not seasonally adjusted, current prices, quarterly & annual)",NA
+"HH_ASSET_FIN_Y","291Y405","SEC04","2","?","A","2.4.2.1. 제도부문별 대차대조표(명목, 연말기준)","2.4.2.1. Balance sheets by institutional sectors(at current prices, year-end)",NA
+"HH_ASSET_NONFIN_Y","291Y405","SEC04","1","?","A","2.4.2.1. 제도부문별 대차대조표(명목, 연말기준)","2.4.2.1. Balance sheets by institutional sectors(at current prices, year-end)",NA
+"HH_DEBT1_Q","281Y002","4050000","L","D5000","Q","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"HH_DEBT1_Y","281Y002","4050000","L","D5000","A","2.3.1.2. 금융자산부채잔액표(2008~)","2.3.1.2. Financial Assets and Liabilities Outstanding(2008~)",NA
+"HH_DEBT2_Q","281Y007","305000","L","C4000","Q","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"HH_DEBT2_Y","281Y007","305000","L","C4000","A","2.3.2.2. 금융자산부채잔액표(2002~)","2.3.2.2.1. Financial Assets and Liabilities Outstanding(2002~2013)",NA
+"HH_DEBT3_Q","281Y005","208000","2","C290","Q","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"HH_DEBT3_Y","281Y005","208000","2","C290","A","2.3.3.2. 금융자산부채잔액표(1975~2005)","2.3.3.2.1. Financial Assets & Liabilities Outstanding (End of)",NA
+"HH_DI_Y","200Y016","1020130","?","?","A","2.1.3.2.2. 국민소득과 부문별 국민처분가능소득(명목, 연간)","2.1.3.2.2. National Income and National Disposable Income (current prices, annual)","nominal"
+"HH_MORT_Q","151Y004","11000A0","?","?","Q","1.2.4.1.2. 가계신용(용도별, 분기)","1.2.4.1.2. By Purpose",NA
+"HH_MORT_Y","151Y004","11000A0","?","?","A","1.2.4.1.2. 가계신용(용도별, 분기)","1.2.4.1.2. By Purpose",NA
+"HOUSE_M","901Y062","P63A","?","?","M","4.4.1.1. 주택매매가격지수(KB)","4.4.1.1. House Price Index(KB)","KB"
+"IAIP_Q","902Y020","KOR","?","?","Q","9.1.5.1. 국제 주요국 산업생산지수(계절변동조정)","9.1.5.1. Industrial Production indices(S.A.)",NA
+"IMPORT_Q","902Y013","KR","?","?","Q","9.1.3.5. 국제 주요국 수입(통관기준)","9.1.3.5. Goods, Value of Imports, Cost, Insurance, Freight (CIF), US Dollars",NA
+"INT_AAm3Y_D","817Y002","010300000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_AAm3Y_M","721Y001","BEEA472","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_AAm3Y_Q","721Y001","BEEA472","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_AAm3Y_Y","721Y001","BEEA472","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BASE_D","722Y001","0101000","?","?","D","1.3.1. 한국은행 기준금리 및 여수신금리","1.3.1. Bank of Korea Base Rate & Interest Rates on Loans and Discounts of the Bank of Korea",NA
+"INT_BASE_M","722Y001","0101000","?","?","M","1.3.1. 한국은행 기준금리 및 여수신금리","1.3.1. Bank of Korea Base Rate & Interest Rates on Loans and Discounts of the Bank of Korea",NA
+"INT_BASE_Q","722Y001","0101000","?","?","Q","1.3.1. 한국은행 기준금리 및 여수신금리","1.3.1. Bank of Korea Base Rate & Interest Rates on Loans and Discounts of the Bank of Korea",NA
+"INT_BBBm3Y_D","817Y002","010320000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_BBBm3Y_M","721Y001","BEEA473","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BBBm3Y_Q","721Y001","BEEA473","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BBBm3Y_Y","721Y001","BEEA473","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BOK1Y_D","817Y002","010400000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_BOK1Y_M","721Y001","BEEA43","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BOK1Y_Q","721Y001","BEEA43","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_BOK1Y_Y","721Y001","BEEA43","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CALL_D","817Y002","010101000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_CALL_M","721Y001","BEEA14","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CALL_Q","721Y001","BEEA14","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CALL_Y","721Y001","BEEA14","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CD91_D","817Y002","010502000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_CD91_M","721Y001","BEEA21","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CD91_Q","721Y001","BEEA21","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CD91_Y","721Y001","BEEA21","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CP91_D","817Y002","010503000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_CP91_M","721Y001","BEEA31","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CP91_Q","721Y001","BEEA31","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_CP91_Y","721Y001","BEEA31","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB10Y_D","817Y002","010210000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_KTB10Y_M","721Y001","BEEA422","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB10Y_Q","721Y001","BEEA422","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB10Y_Y","721Y001","BEEA422","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB1Y_D","817Y002","010190000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_KTB1Y_M","721Y001","BEEA411","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB1Y_Q","721Y001","BEEA411","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB1Y_Y","721Y001","BEEA411","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB2Y_D","817Y002","010195000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_KTB2Y_M","721Y001","BEEA426","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB2Y_Q","721Y001","BEEA426","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB2Y_Y","721Y001","BEEA426","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB3Y_D","817Y002","010200000","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_KTB3Y_M","721Y001","BEEA42","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB3Y_Q","721Y001","BEEA42","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB3Y_Y","721Y001","BEEA42","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB5Y_D","817Y002","010200001","?","?","D","1.3.2.1. 시장금리(일별)","1.3.2.1. Market Interest Rates(Daily)",NA
+"INT_KTB5Y_M","721Y001","BEEA421","?","?","M","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB5Y_Q","721Y001","BEEA421","?","?","Q","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"INT_KTB5Y_Y","721Y001","BEEA421","?","?","A","1.3.2.2. 시장금리(월,분기,년)","1.3.2.2. Market Interest Rates(Monthly, Quarterly, Annually)",NA
+"KOSPI_D","802Y001","0001000","?","?","D","1.5.1.1. 주식시장(일)","1.5.1.1. Stock Market(daily)",NA
+"KOSPI_M",NA,"AI1CG","?","?","M",NA,NA,NA
+"KOSPI_Y",NA,"AI1CG","?","?","A",NA,NA,NA
+"NGDP_Q","200Y005","1400","?","?","Q","2.1.2.1.3. 경제활동별 GDP 및 GNI(원계열, 명목, 분기 및 연간)","2.1.2.1.3. GDP and GNI by Economic Activities (not seasonally adjusted, current prices, quarterly & annual)",NA
+"NGDP_Y","200Y005","1400","?","?","A","2.1.2.1.3. 경제활동별 GDP 및 GNI(원계열, 명목, 분기 및 연간)","2.1.2.1.3. GDP and GNI by Economic Activities (not seasonally adjusted, current prices, quarterly & annual)",NA
+"NI_M","902Y003","4020404","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"NI_Q","902Y003","4020404","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"NI_Y","902Y003","4020404","?","?","A","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"OIL_M","902Y003","4010101","?","?","M","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"OIL_Q","902Y003","4010101","?","?","Q","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"OIL_Y","902Y003","4010101","?","?","A","9.1.6.3. 국제상품가격","9.1.6.3. World Commodity Prices",NA
+"RESID_PERMIT_M","901Y105","ALL","?","?","M","8.4.6. 주택건설인허가실적","8.4.6. Housing construction permits",NA
+"RGDP_Q","200Y006","1400","?","?","Q","2.1.2.1.4. 경제활동별 GDP 및 GNI(원계열, 실질, 분기 및 연간)","2.1.2.1.4. GDP and GNI by Economic Activities (not seasonally adjusted, chained 2015 year prices, quarterly & annual)",NA
+"RGDP_QA","200Y004","1400","?","?","Q","2.1.2.1.2. 경제활동별 GDP 및 GNI(계절조정, 실질, 분기)","2.1.2.1.2. GDP and GNI by Economic Activities (seasonally adjusted, chained 2015 year prices, quarterly)",NA
+"RGDP_Y","200Y006","1400","?","?","A","2.1.2.1.4. 경제활동별 GDP 및 GNI(원계열, 실질, 분기 및 연간)","2.1.2.1.4. GDP and GNI by Economic Activities (not seasonally adjusted, chained 2015 year prices, quarterly & annual)",NA
+"UNEMP_MA","902Y021","KOR","?","?","M","9.1.5.2. 국제 주요국 실업률(계절변동조정)","9.1.5.2. Unemployment Rates(S.A.)","adjusted"
+"UNEMP_QA","902Y021","KOR","?","?","Q","9.1.5.2. 국제 주요국 실업률(계절변동조정)","9.1.5.2. Unemployment Rates(S.A.)","adjusted"
+"UNEMP_Y","902Y021","KOR","?","?","A","9.1.5.2. 국제 주요국 실업률(계절변동조정)","9.1.5.2. Unemployment Rates(S.A.)",NA
+"US_CPI_M","902Y008","US","?","?","M","9.1.2.2. 국제 주요국 소비자물가지수","9.1.2.2. Consumer Price indices",NA
+"US_CPI_Q","902Y008","US","?","?","Q","9.1.2.2. 국제 주요국 소비자물가지수","9.1.2.2. Consumer Price indices",NA
+"US_DOWJONES_M","902Y002","3020101","?","?","M","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"US_DOWJONES_Q","902Y002","3020101","?","?","Q","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"US_EXPORT_Q","902Y012","US","?","?","Q","9.1.3.4. 국제 주요국 수출(통관기준)","9.1.3.4. Goods, Value of Exports, Free on board (FOB), US Dollars",NA
+"US_IAIP_Q","902Y020","USA","?","?","Q","9.1.5.1. 국제 주요국 산업생산지수(계절변동조정)","9.1.5.1. Industrial Production indices(S.A.)",NA
+"US_IMPORT_Q","902Y013","US","?","?","Q","9.1.3.5. 국제 주요국 수입(통관기준)","9.1.3.5. Goods, Value of Imports, Cost, Insurance, Freight (CIF), US Dollars",NA
+"US_LIBOR3M_M","902Y001","1030401","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_LIBOR3M_Q","902Y001","1030401","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_NASDAQ_M","902Y002","3020103","?","?","M","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"US_NASDAQ_Q","902Y002","3020103","?","?","Q","9.1.6.2. 국제 주요국 주가지수","9.1.6.2. Stock price indices",NA
+"US_RGDP_QG","902Y015","USA","?","?","Q","9.1.4.1. 국제 주요국 경제성장률","9.1.4.1. Growth Rate of GDP",NA
+"US_RGDP_YG","902Y015","USA","?","?","A","9.1.4.1. 국제 주요국 경제성장률","9.1.4.1. Growth Rate of GDP",NA
+"US_TBill6M_M","902Y001","1020302","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TBill6M_Q","902Y001","1020302","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TBond30Y_M","902Y001","1020501","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TBond30Y_Q","902Y001","1020501","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TNote10Y_M","902Y001","1020403","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TNote10Y_Q","902Y001","1020403","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TNote5Y_M","902Y001","1020402","?","?","M","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_TNote5Y_Q","902Y001","1020402","?","?","Q","9.1.6.1. 주요국제금리","9.1.6.1. Financial Market Key Indicators",NA
+"US_UNEMP_QA","902Y021","USA","?","?","Q","9.1.5.2. 국제 주요국 실업률(계절변동조정)","9.1.5.2. Unemployment Rates(S.A.)",NA
+"US_UNEMP_MA","902Y021","USA","?","?","M","9.1.5.2. 국제 주요국 실업률(계절변동조정)","9.1.5.2. Unemployment Rates(S.A.)",NA
+"USDKRW_D","731Y001","0000001","?","?","D","3.1.1.1. 주요국 통화의 대원화환율","3.1.1.1. Arbitraged Rates of Major Currencies Against Won",NA
+"USDKRW_M","731Y004","0000001","0000100","?","M","3.1.2.1. 주요국 통화의 대원화환율","3.1.2.1. Arbitraged Rates of Major Currencies Against Won, Longer Frequency","mean"
+"USDKRW_Q","731Y004","0000001","0000100","?","Q","3.1.2.1. 주요국 통화의 대원화환율","3.1.2.1. Arbitraged Rates of Major Currencies Against Won, Longer Frequency","mean"
+"USDKRW_Y","731Y004","0000001","0000100","?","A","3.1.2.1. 주요국 통화의 대원화환율","3.1.2.1. Arbitraged Rates of Major Currencies Against Won, Longer Frequency","mean"

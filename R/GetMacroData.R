@@ -14,74 +14,104 @@ ECOS_key <- Sys.getenv(x="ECOS_key")
 
 ## 1. ECOS Macro Economic Data -------------------------------------------------
 
-ecos_macro_M <- readRDS("Rdata/ecos_macro_raw_M.rds")
-ecos_macro_Q <- readRDS("Rdata/ecos_macro_raw_Q.rds")
-ecos_macro_Y <- readRDS("Rdata/ecos_macro_raw_Y.rds")
 EcosStatsList <- readRDS("Rdata/EcosStatsList.rds")
-variable_names <- read.csv("InputFiles/ecos_macro_variables_list.csv") %>% 
-                  filter(USE=="O") %>% 
-                  select(-USE)
+data_list <- readRDS("Rdata/ecos_code_list2.rds") 
+
+safe_getEcosData_M <- safely(.f=function(.x,.y,.z) getEcosData(ECOS_key = ECOS_key, 
+                                                            stat_code=.x, 
+                                                            period="M", 
+                                                            start_time="199001", 
+                                                            end_time=today() %>% format(format="%Y%m"), 
+                                                            item_code1=.y, 
+                                                            item_code2=.z, 
+                                                            item_code3="?"))
+
+safe_getEcosData_Q <- safely(.f=function(.x,.y) getEcosData(ECOS_key = ECOS_key, 
+                                                            stat_code=.x, 
+                                                            period="Q", 
+                                                            start_time="1990Q1", 
+                                                            end_time=today() %>% format(format="%YQ%q"), 
+                                                            item_code1=.y, 
+                                                            item_code2="?", 
+                                                            item_code3="?"))
+
+safe_getEcosData_Y <- safely(.f=function(.x,.y) getEcosData(ECOS_key = ECOS_key, 
+                                                            stat_code=.x, 
+                                                            period="A", 
+                                                            start_time="1990", 
+                                                            end_time=today() %>% format(format="%Y"), 
+                                                            item_code1=.y, 
+                                                            item_code2="?", 
+                                                            item_code3="?"))
+
+data_list_M <- data_list %>% filter(CYCLE=="M")
+
+ecos_macro_raw_M <- map2(data_list_M$STAT_CODE, data_list_M$ITEM_CODE, safe_getEcosData_M) %>% 
+  transpose() %>% 
+  pluck("result") %>% 
+  set_names(data_list_M$VAR) %>% 
+  compact()
+
+ecos_macro_M <- ecos_macro_raw_M %>% 
+  reduce(left_join, by="TIME") %>% 
+  as_tibble() %>% 
+  set_names(c("yearM",names(ecos_macro_raw_M))) %>% 
+  mutate(yearM=as.yearmon(yearM,format="%Y%m")) %>% 
+  mutate(across(.cols=-1,.fns=as.numeric))
+
+data_list_Q <- data_list %>% filter(CYCLE =="Q")
+ecos_macro_raw_Q <- map2(data_list_Q$STAT_CODE, data_list_Q$ITEM_CODE, safe_getEcosData_Q) %>% 
+  transpose() %>% 
+  pluck("result") %>% 
+  set_names(data_list_Q$VAR) %>% 
+  compact()
+
+ecos_macro_Q <- ecos_macro_raw_Q %>% 
+  reduce(left_join, by="TIME") %>% 
+  as_tibble() %>% 
+  set_names(c("yearQ",names(ecos_macro_raw_Q))) %>% 
+  mutate(yearM=as.yearqtr(yearQ,format="%Y%q")) %>% 
+  mutate(across(.cols=-1,.fns=as.numeric))
+
 
 tidy_ecos_macro_M <- ecos_macro_M %>% 
-                      pivot_longer(-yearM,names_to='ITEM_CODE') %>% 
-                      inner_join(variable_names,by="ITEM_CODE") %>% 
-                      mutate(yearQ=as.yearqtr(yearM)) 
-
-monthly_data_code <- tidy_ecos_macro_M %>%
-                      drop_na(value) %>% 
-                      group_by(yearQ,ITEM_CODE) %>% 
-                      summarise(N=n()) %>% 
-                      group_by(ITEM_CODE) %>% 
-                      summarise(average=mean(N)) %>% 
-                      filter(average>2) %>% 
-                      pull(ITEM_CODE)
+                      pivot_longer(-yearM,names_to='vars') %>% 
+                      mutate(yearQ=as.yearqtr(yearM),
+                             year=year(yearM)) 
 
 monthly_data <- tidy_ecos_macro_M %>% 
-                select(-yearQ) %>% 
-                filter(ITEM_CODE %in% monthly_data_code) %>% 
-                mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_MG"),str_c(NAME,"_M"))) %>% 
-                select(yearM,NAME, value)
+                select(yearM,vars,value) %>% 
+                mutate(vars=ifelse(str_sub(vars,-2,-1)=="_G",str_replace(vars,"_G","_MG"),str_c(vars,"_M")))
 
 
 tidy_ecos_macro_Q <- ecos_macro_Q %>% 
-                    pivot_longer(-yearQ,names_to='ITEM_CODE') %>% 
-                    inner_join(variable_names,by="ITEM_CODE") %>% 
-                    mutate(yearQ=as.yearqtr(yearQ,format="%Y%q")) 
+                    pivot_longer(-yearQ,names_to='vars') %>% 
+                    mutate(yearQ=as.yearqtr(yearQ,format="%YQ%q"),
+                           year=year(yearQ)) 
 
 quarterly_data <- tidy_ecos_macro_Q %>% 
-                   mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_QG"),str_c(NAME,"_Q"))) %>% 
-                   select(yearQ,NAME, value)
+                  select(yearQ,vars,value) %>% 
+                   mutate(vars=ifelse(str_sub(vars,-2,-1)=="_G",str_replace(vars,"_G","_QG"),str_c(vars,"_Q")))
 
-
-tidy_ecos_macro_Y <- ecos_macro_Y %>% 
-                      pivot_longer(-year,names_to='ITEM_CODE') %>% 
-                      inner_join(variable_names,by="ITEM_CODE")  
-
-annual_data <- tidy_ecos_macro_Y %>% 
-                  mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",str_replace(NAME,"_G","_YG"),str_c(NAME,"_Y"))) %>% 
-                  select(year,NAME, value)
-
-description <- tidy_ecos_macro_M %>% select(NAME,ITEM_CODE) %>% distinct() %>% 
+description <- data_list %>%  
                   left_join(EcosStatsList %>% 
-                              filter(str_detect(STAT_NAME_EN,"Macro Economic Analysis")) %>% 
-                              select(STAT_CODE, ITEM_CODE, STAT_NAME, ITEM_NAME,ITEM_NAME_EN),
-                            by="ITEM_CODE") 
+                              select(STAT_CODE, ITEM_CODE, STAT_NAME, ITEM_NAME,STAT_NAME_EN,ITEM_NAME_EN),
+                            by=c("STAT_CODE","ITEM_CODE")) 
 
-ecos_macro <- list(annual=annual_data, quarterly=quarterly_data, monthly=monthly_data,description=description)
+ecos_macro <- list(quarterly=quarterly_data, monthly=monthly_data,description=description)
 saveRDS(ecos_macro,'Rdata/ecos_macro.rds')
 
-monthly_dataW <- monthly_data %>% pivot_wider(names_from = NAME,values_from = value)
-quarterly_dataW <- quarterly_data %>% pivot_wider(names_from = NAME,values_from = value)
-annual_dataW <- annual_data %>% pivot_wider(names_from = NAME,values_from = value)
+monthly_dataW <- monthly_data %>% pivot_wider(names_from = vars,values_from = value)
+quarterly_dataW <- quarterly_data %>% pivot_wider(names_from = vars,values_from = value)
+
 
 wb <- createWorkbook()
 addWorksheet(wb,"monthly")
 addWorksheet(wb,"quarterly")
-addWorksheet(wb,"annual")
 addWorksheet(wb,"description")
 writeData(wb,"monthly",monthly_dataW,startCol=1,startRow=1,rowNames=FALSE)
 writeData(wb,"quarterly",quarterly_dataW,startCol=1,startRow=1,rowNames=FALSE)
-writeData(wb,"annual",annual_dataW,startCol=1,startRow=1,rowNames=FALSE)
+
 writeData(wb,"description",description,startCol=1,startRow=1,rowNames=FALSE)
 saveWorkbook(wb,"Output/ecos_macro_data.xlsx",overwrite = TRUE)
 
@@ -92,16 +122,16 @@ saveWorkbook(wb,"Output/ecos_macro_data.xlsx",overwrite = TRUE)
 
 code_list <- readRDS("Rdata/ecos_code_list.rds") 
 
-required_Q <- code_list %>% filter(period=="QQ") %>% pull(name)
-required_Y <- code_list %>% filter(period=="YY") %>% pull(name)
-required_M <- code_list %>% filter(period=="MM") %>% pull(name)
-required_D <- code_list %>% filter(period=="DD") %>% pull(name)
+required_Q <- code_list %>% filter(period=="Q") %>% pull(name)
+required_Y <- code_list %>% filter(period=="A") %>% pull(name)
+required_M <- code_list %>% filter(period=="M") %>% pull(name)
+required_D <- code_list %>% filter(period=="D") %>% pull(name)
 
 
 required.data <- c(required_Y,required_Q,required_M,required_D)
 
 DATA <- vector(mode="list",length=length(required.data)) %>% set_names(required.data)
-
+i=required.data[2]
 for(i in required.data){
   code_info <- code_list %>% filter(name==i)
   DATA[[i]] <- getEcosData(ECOS_key=ECOS_key,
