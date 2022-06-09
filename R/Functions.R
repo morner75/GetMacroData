@@ -140,6 +140,7 @@ ecosSearch <- function(x) {
 EcosTerm <- function(time,type){
   case_when(type=="M" ~  as.yearmon(time) %>% format(.,"%Y%m"),
             type=="Q" ~ as.yearqtr(time) %>% format(.,"%YQ%q"),
+            type=="D" ~ as.Date(time) %>% format(.,"%Y%m%d"),
             TRUE ~ as.character(year(time)))
 }
 
