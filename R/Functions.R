@@ -4,7 +4,7 @@
 #
 ##############################################################################
 
-packages <- c("tidyverse","httr","jsonlite","tempdisagg","lubridate","zoo")
+packages <- c("tidyverse","httr","jsonlite","lubridate","zoo")
 if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(packages %in% installed.packages())], dependencies = TRUE)
 sapply(packages,require,character.only=TRUE)
 
