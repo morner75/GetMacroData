@@ -368,7 +368,7 @@ StarsDataY <-  StarsDataY %>%
 
 ################################################################
 #
-# Part V. ata augmentation with ecos_macro
+# Part V. Data augmentation with ecos_macro
 #
 ################################################################
 
@@ -377,10 +377,12 @@ ecos_macro <- readRDS("Rdata/ecos_macro.rds")
 macroDataM <- macroDataQ <- macroDataY <- NULL
 
 macroDataM  <- ecos_macro %>% pluck("monthly") %>% 
-  pivot_wider(names_from = NAME) %>% 
+  pivot_wider(names_from = vars) %>% 
   left_join(StarsDataM,by="yearM")
 
-var_M1 <- paste0(c('ALL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
+
+names(macroDataM)
+var_M1 <- paste0(c('AL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
                   'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ'),'_M')
 var_M2 <- paste0(c('US_CPI','RESID_PERMIT',"CRRNT_ACC","FIN_ACC","GOODS_BAL","SERVICES_BAL"),'_M')
 

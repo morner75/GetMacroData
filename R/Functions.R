@@ -255,7 +255,7 @@ makeVariable <- function(data, type=c("growth","diff","vol","logdiff","EMWAvol")
 # level data cleansing
 levelCleansingECOS <- function(DATA,name,period=c("MM","QQ","YY")) {
   if(period=="QQ"){
-    DATA[[name]]%>% transmute(time=as.yearqtr(TIME,format="%Y%q"), val=as.double(DATA_VALUE)) %>%  
+    DATA[[name]]%>% transmute(time=as.yearqtr(TIME,format="%YQ%q"), val=as.double(DATA_VALUE)) %>%  
       set_names(c("yearQ",name))
   }else if(period=="YY"){
     DATA[[name]]%>% transmute(year=as.numeric(TIME), val=as.double(DATA_VALUE)) %>% 
@@ -283,11 +283,12 @@ year2qtrECOS <- function(DATA,name,conversion="sum"){
 # HH_DEBT and CP_DEBT cleansing
 Obtain_DebtQECOS <- function(work_needed_data,DATA) {
   map(work_needed_data, ~levelCleansingECOS(DATA,.x,"QQ")) %>% reduce(full_join,by="yearQ") %>% 
-    set_names(c("yearQ","DEBT3","DEBT2","DEBT1")) %>%  
+    set_names(c("yearQ","DEBT1","DEBT2","DEBT3")) %>%  
     mutate(DEBT3=replace(DEBT3,DEBT3==0,NA),DEBT2=replace(DEBT2,DEBT2==0,NA)) %>%
     arrange(yearQ) %>% mutate(ratio1=mean(DEBT1/DEBT2,na.rm=TRUE),
                               ratio2=mean(DEBT2/DEBT3,na.rm=TRUE)) %>% 
-    mutate(DEBT3=DEBT3*ratio1*ratio2,DEBT2=DEBT2*ratio1,
+    mutate(DEBT3=DEBT3*ratio1*ratio2,
+           DEBT2=DEBT2*ratio1,
            DEBT=case_when(is.na(DEBT1) & is.na(DEBT2) ~ DEBT3,
                           is.na(DEBT1) ~ DEBT2,
                           TRUE ~ DEBT1)) %>% select(yearQ,DEBT) 
@@ -310,7 +311,7 @@ mon2yearECOS <- function(DATA,name) DATA[[name]] %>% transmute(year=year(ymd(pas
 # Get DEBT series
 Obtain_DebtYECOS <- function(work_needed_data,DATA) {
   map(work_needed_data, ~levelCleansingECOS(DATA,.x,"YY")) %>% reduce(full_join,by="year") %>% 
-    set_names(c("year","DEBT3","DEBT2","DEBT1")) %>%  
+    set_names(c("year","DEBT1","DEBT2","DEBT3")) %>%  
     arrange(year) %>% mutate(DEBT3=replace(DEBT3,DEBT3==0,NA),DEBT2=replace(DEBT2,DEBT2==0,NA)) %>% 
     mutate(ratio1=mean(DEBT1/DEBT2,na.rm=TRUE),
            ratio2=mean(DEBT2/DEBT3,na.rm=TRUE)) %>% 
