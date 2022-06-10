@@ -10,5 +10,5 @@
 
 수집된 데이터는 연간/분기/월별/일별 주요 거시금융 데이터이며, Output 폴더에 xlsx 및 rds 확장자 형태로 저장되어 있고, 데이터에 대한 자세한 내용은 "description" 시트를 참조하시기 바랍니다. 
 
-<img src="https://www.fss.or.kr/static/fss/img/sub/img_ci6.png" alt="image1" style="zoom:18%;" /> **금융감독원 시스템리스크분석팀**
+<img src="https://www.fss.or.kr/static/fss/img/sub/img_ci6.png" alt="image1" style="zoom:10%;" /> **금융감독원 시스템리스크분석팀**
 
