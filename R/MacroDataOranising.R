@@ -381,7 +381,7 @@ macroDataM  <- ecos_macro %>% pluck("monthly") %>%
   left_join(StarsDataM,by="yearM")
 
 
-names(macroDataM)
+
 var_M1 <- paste0(c('AL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
                   'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ'),'_M')
 var_M2 <- paste0(c('US_CPI','RESID_PERMIT',"CRRNT_ACC","FIN_ACC","GOODS_BAL","SERVICES_BAL"),'_M')
@@ -401,20 +401,19 @@ macroDataM <- macroDataM %>%
   ) %>% 
   select(yearM,all_of(names(.) %>% sort()))
 
-
 macroDataQ <- ecos_macro %>% pluck("quarterly") %>%
   bind_rows(
       ecos_macro %>% pluck("monthly") %>%
       mutate(yearQ=as.yearqtr(yearM)) %>%
-      filter(str_detect(NAME, "EXPORT_PRICE|IMPORT_PRICE|NET_TERMS_TRADE|OPERATION_RATIO|PPI|BAL|ACC",negate = TRUE)) %>%
-      group_by(yearQ,NAME) %>%
+      filter(str_detect(vars, "APARTMENT|APARTMENT_JEONSE|HOUSE_JEONSE|M1|M2")) %>%
+      group_by(yearQ,vars) %>%
       summarise(value=mean(value,na.rm=TRUE), .groups="drop") %>% 
-      mutate(NAME=str_replace(NAME,"_M","_Q")) 
-  ) %>%
-  pivot_wider(names_from = NAME) %>% 
+      mutate(vars=str_replace(vars,"_M","_Q")) 
+  ) %>% 
+  pivot_wider(names_from = vars) %>% 
   left_join(StarsDataQ,by="yearQ") %>% 
-  select(yearQ,all_of(names(.) %>% sort()))
-
+  select(yearQ,all_of(names(.) %>% sort())) 
+  
 var_Q1 <- paste0(c('AL','CORN','CU','FOREIGN_RESERVES','GOLD',"CN_HANGSENG",
                    'NET_TERMS_TRADE','NI','OIL','US_DOWJONES','US_NASDAQ',
                    'GOV_DEBT','IAIP','IMPORT','EXPORT','CN_EXPORT','CN_IMPORT',
@@ -468,7 +467,7 @@ QtoY_mean <- macroDataQ %>%
             pivot_wider(names_from=NAME,values_from = value)
 
 macroDataY <- ecos_macro %>% pluck("annual") %>% 
-  pivot_wider(names_from = NAME) %>% 
+  pivot_wider(names_from = vars) %>% 
   left_join(StarsDataY,by="year") %>% 
   left_join(MtoY, by="year") %>%
   left_join(QtoY_sum,by="year") %>%
@@ -492,14 +491,8 @@ macroDataY <- macroDataY %>%
   ) %>% 
   select(year,all_of(names(.) %>% sort()))
 
+list(quarterly=macroDataQ, annual=macroDataY, monthly=macroDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
 
-
-# setdiff(names(macroDataQ) %>% str_subset("_Q$")%>% str_sub(1,-3) ,
-#         names(macroDataY) %>% str_subset("_Y$") %>% str_sub(1,-3)  )
-
-
-#list(quarterly=macroDataQ, annual=macroDataY, monthly=macroDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
-list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
 
 
 # data explanation
@@ -517,10 +510,10 @@ StatsDescription <- code_list %>%
   bind_rows(
     map_dfr(c("M","Q","Y"), ~{ecos_macro %>% 
         pluck("description") %>% 
-        mutate(PERIOD=.x,.before=NAME)}) %>% 
-      mutate(NAME=ifelse(str_sub(NAME,-2,-1)=="_G",
-                         str_replace(NAME,"_G",str_c("_",PERIOD,"G")),
-                         str_c(NAME,"_",PERIOD)))
+        mutate(PERIOD=.x,.before=VAR)}) %>% 
+      mutate(NAME=ifelse(str_sub(VAR,-2,-1)=="_G",
+                         str_replace(VAR,"_G",str_c("_",PERIOD,"G")),
+                         str_c(VAR,"_",PERIOD)))
   ) %>% 
   arrange(PERIOD,NAME)
 
