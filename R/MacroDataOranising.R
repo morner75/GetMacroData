@@ -498,7 +498,9 @@ macroDataY <- macroDataY %>%
 #         names(macroDataY) %>% str_subset("_Y$") %>% str_sub(1,-3)  )
 
 
-list(quarterly=macroDataQ, annual=macroDataY, monthly=macroDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
+#list(quarterly=macroDataQ, annual=macroDataY, monthly=macroDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
+list(quarterly=StarsDataQ, annual=StarsDataY, monthly=StarsDataM,daily=StarsDataD) %>% saveRDS(.,"Output/macro_data.rds")
+
 
 # data explanation
 code_list <- readRDS('Rdata/ecos_code_list.rds')
