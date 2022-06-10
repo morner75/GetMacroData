@@ -436,56 +436,56 @@ Anything_at_Risk <- function(var,pred_terms=12,quant_data=quant_data, components
 
 # Auto
 
-Auto_Anything_at_Risk <- function(data_selected, start_quarter,end_quarter,target){
-  
-  #data_selected=data_selected0 ;  start_quarter = "2012 Q1" ; end_quarter = "2021 Q4" ;target="USDKRW_Q"
-  start_yearQ <- start_quarter %>% as.yearqtr() %>% as.numeric()
-  end_yearQ <- end_quarter %>% as.yearqtr() %>% as.numeric()
-  
-  
-  var_na <- data_selected0 %>% 
-    filter(yearQ>=start_yearQ, yearQ<=end_yearQ) %>% 
-    is.na() %>% 
-    colSums() %>% 
-    .[.>0]
-  
-  # selected variables
-  data_selected <- data_selected0 %>% select(yearQ,!any_of(names(var_na))) %>% 
-    filter(yearQ>=start_yearQ, yearQ<=end_yearQ) 
-  
-  # define function
-  scale <- function(x) (x - mean(x))/sd(x)
-  
-  # scaled data
-  data_scaled <- data_selected %>% 
-    mutate_if(is.numeric,scale) 
-  
-  scaling_info <- data_scaled %>% 
-    pivot_longer(-yearQ) %>% 
-    group_by(name) %>% 
-    summarise(mean=mean(value,na.rm=TRUE),sd=sd(value,na.rm=TRUE)) 
-  
-  # data preparation
-  pca_data_aug <- data_scaled %>% 
-    select(-yearQ) %>% 
-    prcomp(scale = FALSE) %>%  
-    augment(data_scaled) 
-  
-  
-  # target variable 
-  pca_data_aug <- pca_data_aug %>% rename_with(.fn=~str_remove(.x,pattern=".fitted"))
-  reg_components <- map(target, ~select_component(data=pca_data_aug, var=.x,no.var=5)) %>% set_names(target)
-  components <- reg_components %>% unlist() %>% unname()
-  quant_data <- pca_data_aug %>%  select(yearQ, all_of(c(target,components)))
-  
-  Results <- map(target, 
-                 ~Anything_at_Risk(.x,pred_terms=8,
-                                   components=reg_components[[.x]] %>% slice_head(n=2),
-                                   quant_data=quant_data,
-                                   tau=c(0.05,0.5,0.95),scaling_info)) %>% 
-    set_names(target)
-  return(Results)
-}
+# Auto_Anything_at_Risk <- function(data_selected, start_quarter,end_quarter,target){
+#   
+#   #data_selected=data_selected0 ;  start_quarter = "2012 Q1" ; end_quarter = "2021 Q4" ;target="USDKRW_Q"
+#   start_yearQ <- start_quarter %>% as.yearqtr() %>% as.numeric()
+#   end_yearQ <- end_quarter %>% as.yearqtr() %>% as.numeric()
+#   
+#   
+#   var_na <- data_selected0 %>% 
+#     filter(yearQ>=start_yearQ, yearQ<=end_yearQ) %>% 
+#     is.na() %>% 
+#     colSums() %>% 
+#     .[.>0]
+#   
+#   # selected variables
+#   data_selected <- data_selected0 %>% select(yearQ,!any_of(names(var_na))) %>% 
+#     filter(yearQ>=start_yearQ, yearQ<=end_yearQ) 
+#   
+#   # define function
+#   scale <- function(x) (x - mean(x))/sd(x)
+#   
+#   # scaled data
+#   data_scaled <- data_selected %>% 
+#     mutate_if(is.numeric,scale) 
+#   
+#   scaling_info <- data_scaled %>% 
+#     pivot_longer(-yearQ) %>% 
+#     group_by(name) %>% 
+#     summarise(mean=mean(value,na.rm=TRUE),sd=sd(value,na.rm=TRUE)) 
+#   
+#   # data preparation
+#   pca_data_aug <- data_scaled %>% 
+#     select(-yearQ) %>% 
+#     prcomp(scale = FALSE) %>%  
+#     augment(data_scaled) 
+#   
+#   
+#   # target variable 
+#   pca_data_aug <- pca_data_aug %>% rename_with(.fn=~str_remove(.x,pattern=".fitted"))
+#   reg_components <- map(target, ~select_component(data=pca_data_aug, var=.x,no.var=5)) %>% set_names(target)
+#   components <- reg_components %>% unlist() %>% unname()
+#   quant_data <- pca_data_aug %>%  select(yearQ, all_of(c(target,components)))
+#   
+#   Results <- map(target, 
+#                  ~Anything_at_Risk(.x,pred_terms=8,
+#                                    components=reg_components[[.x]] %>% slice_head(n=2),
+#                                    quant_data=quant_data,
+#                                    tau=c(0.05,0.5,0.95),scaling_info)) %>% 
+#     set_names(target)
+#   return(Results)
+# }
 
 
 
