@@ -184,7 +184,8 @@ StarsDataQ <- StarsDataD %>%
   mutate(yearQ=as.yearqtr(date)) %>%
   group_by(yearQ) %>% 
   summarise(INT_KTB3Y_VOL_Q=sd(INT_KTB3Y_D,na.rm = TRUE),
-            KOSPI_VOL_Q=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
+            KOSPI_VOL_Q=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE),
+            USDKRW_VOL_Q=sd(KOSPI_D/lag(KOSPI_D)*100-100,na.rm=TRUE)) %>% 
   right_join(StarsDataQ,by="yearQ")
 
 # Residential permit, government balance (M to Q)
