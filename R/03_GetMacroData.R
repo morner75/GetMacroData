@@ -3,7 +3,7 @@ if(!all(packages %in% installed.packages())) install.packages(pkgs=packages[!(pa
 sapply(packages,require,character.only=TRUE)
 
 rm(list=ls())
-source("R/MacroFilesProc.R")
+source("R/02_MacroFilesProc.R")
 source("R/Functions.R")
 
 start_date <- "1990-01-01" %>% ymd()
@@ -30,7 +30,7 @@ safe_getEcosData_Q <- safely(.f=function(.x,.y,.z) getEcosData(ECOS_key = ECOS_k
                                                             stat_code=.x, 
                                                             period="Q", 
                                                             start_time="1990Q1", 
-                                                            end_time=today() %>% format(format="%YQ%q"), 
+                                                            end_time=as.yearqtr(today()) %>% format(format="%YQ%q"), 
                                                             item_code1=.y, 
                                                             item_code2=.z, 
                                                             item_code3="?"))
